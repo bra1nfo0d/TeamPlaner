@@ -30,3 +30,6 @@ class UserInput:
 		
 		self.layout.removeWidget(self.label)
 		self.label.deleteLater()
+
+if __name__ == "__main__":
+	pass

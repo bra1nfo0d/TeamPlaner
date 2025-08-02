@@ -14,3 +14,6 @@ def delete_db():
 
 	except Exception as ex:
 		print(ex)
+
+if __name__ == "__main__":
+	pass

@@ -33,3 +33,6 @@ class WeekOverview(QMainWindow):
 	
 	def get_date_frame_map(self):
 		return self.date_frame_map
+	
+if __name__ == "__main__":
+	pass

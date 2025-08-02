@@ -30,3 +30,6 @@ def get_date_str_list(week=0, form="ddmmyyyy"):
 		return "not yet implemented"
 	elif form == "mmddyy":
 		return "not yet implemented"
+	
+if __name__ == "__main__":
+	pass

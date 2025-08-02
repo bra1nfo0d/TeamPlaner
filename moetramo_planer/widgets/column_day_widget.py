@@ -65,3 +65,6 @@ class ColumnDayWidget(QWidget):
 	
 	def return_date_frame_widgets(self):
 		return [self.date, self.frame_layout, self.spacer]
+	
+if __name__ == "__main__":
+	pass

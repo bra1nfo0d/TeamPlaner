@@ -87,3 +87,6 @@ class InputWindow(QWidget):
 			label = self.label_memory.pop()
 			self.f_layout.removeWidget(label)
 			label.deleteLater()
+
+if __name__ == "__main__":
+	pass

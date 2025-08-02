@@ -20,3 +20,6 @@ def load_user_inputs(date_frame_map=None):
 		connection.close()
 	except Exception as ex:
 		print(ex)
+
+if __name__ == "__main__":
+	pass

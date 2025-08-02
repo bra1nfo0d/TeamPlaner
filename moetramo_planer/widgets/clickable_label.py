@@ -12,3 +12,6 @@ class ClickableLabel(QLabel):
 	def mousePressEvent(self, ev):
 		self.clicked.emit()
 		super().mousePressEvent(ev)
+
+if __name__ == "__main__":
+	pass

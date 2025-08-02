@@ -19,3 +19,6 @@ def store_user_input(date=None, text_memory=None):
 
 	except Exception as ex:
 		print(ex)
+
+if __name__ == "__main__":
+	pass

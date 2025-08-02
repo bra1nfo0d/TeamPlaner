@@ -9,3 +9,6 @@ class CustomLineEdit(QLineEdit):
 			self.deletePressed.emit()
 		else:
 			super().keyPressEvent(event)
+
+if __name__ == "__main__":
+	pass

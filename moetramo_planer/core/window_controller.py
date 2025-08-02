@@ -17,3 +17,6 @@ class WindowController:
 	def start_input_window(self, day, date, frame_layout, spacer):
 		self.input_window = InputWindow(day, date, frame_layout, spacer)
 		self.input_window.show()
+
+if __name__ == "__main__":
+	pass

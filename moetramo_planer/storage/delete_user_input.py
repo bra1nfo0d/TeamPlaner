@@ -22,3 +22,6 @@ def delete_user_input(date=None, text_memory=None):
 		connection.close()
 	except Exception as ex:
 		print(ex)
+
+if __name__ == "__main__":
+	pass

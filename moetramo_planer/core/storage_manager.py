@@ -22,3 +22,6 @@ class StorageManager:
 	
 	def delete_user_input(self, date=None, text_memory=None):
 		delete_user_input(date=date, text_memory=text_memory)
+
+if __name__ == "__main__":
+	pass
