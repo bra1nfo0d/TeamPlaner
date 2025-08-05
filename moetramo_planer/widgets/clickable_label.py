@@ -6,9 +6,8 @@ class ClickableLabel(QLabel):
 
 	def __init__(self, text="", parent=None):
 		super().__init__(text, parent)
-		self.setCursor(Qt.PointingHandCursor)	# changes the cursor-style
+		self.setCursor(Qt.PointingHandCursor)
 	
-	# sends out a event if label clicked
 	def mousePressEvent(self, ev):
 		self.clicked.emit()
 		super().mousePressEvent(ev)

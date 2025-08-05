@@ -4,7 +4,6 @@ from core.window_controller import WindowController
 from core.storage_manager import StorageManager
 
 def main():
-	# runs application
 	app = QApplication(sys.argv)
 	window_controller = WindowController()
 	window_controller.start_week_overview()

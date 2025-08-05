@@ -1,63 +1,69 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QFrame, QSpacerItem, QSizePolicy
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 from core.date_manager import get_date_str
+from core.config_manager import ConfigManager
 from widgets.clickable_label import ClickableLabel
 
 class ColumnDayWidget(QWidget):
 	def __init__(self, day, date):
 		super().__init__()
 
-		self.day = day		# day of the column
-		self.date = date	# date of the column
+		self.config_manager = ConfigManager()
 
-		# changes the boarder-color if its the current day
+		self.day = day		
+		self.date = date	
+
+		self.today_border_color = self.config_manager.load_config()["today_border_color"]
+		self.text_color = self.config_manager.load_config()["day_date_label_color"]
+
+		self.frame = QFrame(self)
+		self.frame.setFrameShape(QFrame.Box)
+		self.frame.setLineWidth(2)
 		if get_date_str(day=0) == date:	
-			self.frame = QFrame(self)
-			self.frame.setFrameShape(QFrame.Box)
-			self.frame.setLineWidth(2)
-			self.frame.setStyleSheet("""border: 1px solid #ccc;
-										border-radius: 10px;
-										border-color: yellow;								
-									""")
+			self.frame.setStyleSheet(f"""border: 1px solid #ccc;
+										 border-radius: 10px;
+										 border-color: {self.today_border_color};""")
 		else:	
-			self.frame = QFrame(self)
-			self.frame.setFrameShape(QFrame.Box)
-			self.frame.setLineWidth(2)
 			self.frame.setStyleSheet("""border: 1px solid #ccc;
 										border-radius: 10px;								
 									""")
 
-		# frame layout
 		self.frame_layout = QVBoxLayout(self.frame)
 		self.frame_layout.setContentsMargins(8, 8, 8, 8)
 		self.frame_layout.setSpacing(4)
 
-		# main layout
 		main_layout = QVBoxLayout(self)
 		main_layout.addWidget(self.frame)
 
-		# adds the label and the spacer
 		self.add_label()
 		self.add_spacer()
 
-
-	# adds spacer
 	def add_spacer(self):
 		self.spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 		self.frame_layout.addItem(self.spacer)
 
-	# adds label with current day and date
 	def add_label(self):
+		padding_layout = QVBoxLayout()
+		padding_layout.setContentsMargins(0, 0, 0, 10)
+		
 		label = ClickableLabel(f"{self.day}\n{self.date}")
 		label.setAlignment(Qt.AlignCenter)
-		label.setStyleSheet("""padding: 4px; 
-							   border: 1px solid #ccc;
-					  		   border-radius: 10px;
-					  		""")
+		label.setFont(QFont("Arial", 10, QFont.Bold))
+		if get_date_str(0) == self.date:
+			label.setStyleSheet(f"""padding: 4px; 
+									border: 2px solid {self.today_border_color};
+									border-radius: 10px;
+									color: {self.text_color};""")
+		else:
+			label.setStyleSheet(f"""padding: 4px; 
+									border: 1px solid #ccc;
+									border-radius: 10px;
+									color: {self.text_color};""")
 		label.clicked.connect(self.label_clicked)
-		self.frame_layout.addWidget(label)
+		padding_layout.addWidget(label)
+		self.frame_layout.addLayout(padding_layout)
 	
-	# opens input window if label click event
 	def label_clicked(self):
 		from core.window_controller import WindowController
 		self.window_controller = WindowController()
