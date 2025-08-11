@@ -1,27 +1,99 @@
-from storage.create_db import create_db
-from storage.load_user_inputs import load_user_inputs
-from storage.store_user_input import store_user_input
-from storage.delete_db import delete_db
-from storage.delete_user_input import delete_user_input
+import sqlite3
+import os
+import json
 
 class StorageManager:
 	def __init__(self):
 		pass
 
 	def create_db(self):
-		create_db()
+		try:
+			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
+			connection = sqlite3.connect(db_path)
+			cursor = connection.cursor()
+			cursor.execute("""
+						CREATE TABLE IF NOT EXISTS user_inputs (
+						id INTEGER PRIMARY KEY AUTOINCREMENT,
+						date TEXT NOT NULL,
+						text TEXT,
+						config TEXT)
+						""")
+			connection.commit()
+			connection.close()
+		except Exception as ex:
+			print(ex)
 
 	def laod_user_data(self, date_frame_map=None):
-		load_user_inputs(date_frame_map=date_frame_map)
+		from widgets.user_input import UserInput
+		try:
+			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
+			connection = sqlite3.connect(db_path)
+			cursor = connection.cursor()
 
-	def store_user_input(self, date=None, text_memory=None):
-		store_user_input(date=date, text_memory=text_memory)
+			cursor.execute("SELECT date, text, config FROM user_inputs")
+			rows = cursor.fetchall()
+
+			for row in rows:
+				user_input = UserInput(text_memory=json.loads(row[1]), layout=date_frame_map[row[0]][0], spacer=date_frame_map[row[0]][1], date=row[0], settings=json.loads(row[2]))
+				user_input.show_input()
+			
+			connection.close()
+		except Exception as ex:
+			print(ex)
+
+	def store_user_input(self, date=None, text_memory=None, config=None):
+		try:
+			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
+			connection = sqlite3.connect(db_path)
+			cursor = connection.cursor()
+
+			cursor.execute("""
+						INSERT OR REPLACE INTO user_inputs (date, text, config)
+						VALUES (?, ?, ?)""", (
+								date,
+								json.dumps(text_memory),
+								json.dumps(config)
+						))
+			connection.commit()
+			connection.close()
+
+		except Exception as ex:
+			print(ex)
 
 	def delete_db(self):
-		delete_db()
+		try:
+			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
+			connection = sqlite3.connect(db_path)
+			cursor = connection.cursor()
+
+			cursor.execute("DELETE FROM user_inputs")
+
+			connection.commit()
+			connection.close()
+
+		except Exception as ex:
+			print(ex)
 	
 	def delete_user_input(self, date=None, text_memory=None):
-		delete_user_input(date=date, text_memory=text_memory)
+		try:
+			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
+			connection = sqlite3.connect(db_path)
+			cursor = connection.cursor()
+
+			json_text = json.dumps(text_memory)
+
+			cursor.execute("""
+						DELETE FROM user_inputs
+						WHERE date = ? AND text = ?
+						""", (
+							date,
+							json_text
+						))
+			
+			connection.commit()
+			connection.close()
+		except Exception as ex:
+			print(ex)
 
 if __name__ == "__main__":
 	pass

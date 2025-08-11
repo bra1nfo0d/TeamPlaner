@@ -9,9 +9,13 @@ DEFAULT_CONFIG = {
 	"today_border_color": "#FFFF00",
 	"day_date_label_color": "#FFFFFF",
 	"input_types": ["Tour", "Termin", "Lieferung"],
-	"input_types_header": {"Tour": ["_", "Fahrzeug", "Monteure", "Aufträge"],
+	"input_types_header": {"Tour": ["_", "Fahrzeug", "Monteure", "+Aufträge"],
 						   "Termin": ["_", "Mitarbeiter", "Typ", "Zeit"],
-						   "Lieferung": ["Lieferung"]}
+						   "Lieferung": ["Lieferung"]},
+	"input_types_config": {"Tour": ["#ccc", "#ccc"],
+						   "Termin": ["#ccc", "#ccc"],
+						   "Lieferung": ["#0000FF", "#ccc"]},
+	"calc_value": 1000.00
 }
 
 class ConfigManager:
