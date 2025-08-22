@@ -38,9 +38,11 @@ class InputWindow(QWidget):
 
 		self.drop_bar = QComboBox()
 		self.drop_bar.addItems(self.config_manager.load_config()["input_types"])
+		self.drop_bar.setStyleSheet("background-color: #121212")
 		self.drop_bar.currentTextChanged.connect(self.on_value_changed)
 
 		self.input_field = CustomLineEdit()
+		self.input_field.setStyleSheet("background-color: #121212")
 		self.input_field.returnPressed.connect(self.on_return)
 		self.input_field.deletePressed.connect(self.on_delete)		
 		

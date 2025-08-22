@@ -2,14 +2,17 @@ import sqlite3
 import os
 import json
 
+APP_NAME = "moetramoPlaner"
+DATA_DIR = os.path.join(os.getenv("APPDATA"), APP_NAME)  # writable location
+DB_FILE = os.path.join(DATA_DIR, "storage.db")
+
 class StorageManager:
 	def __init__(self):
-		pass
+		os.makedirs(DATA_DIR, exist_ok=True)
 
 	def create_db(self):
 		try:
-			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
-			connection = sqlite3.connect(db_path)
+			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
 			cursor.execute("""
 						CREATE TABLE IF NOT EXISTS user_inputs (
@@ -26,8 +29,7 @@ class StorageManager:
 	def laod_user_data(self, date_frame_map=None):
 		from widgets.user_input import UserInput
 		try:
-			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
-			connection = sqlite3.connect(db_path)
+			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
 
 			cursor.execute("SELECT date, text, config FROM user_inputs")
@@ -43,8 +45,7 @@ class StorageManager:
 
 	def store_user_input(self, date=None, text_memory=None, config=None):
 		try:
-			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
-			connection = sqlite3.connect(db_path)
+			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
 
 			cursor.execute("""
@@ -62,8 +63,7 @@ class StorageManager:
 
 	def delete_db(self):
 		try:
-			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
-			connection = sqlite3.connect(db_path)
+			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
 
 			cursor.execute("DELETE FROM user_inputs")
@@ -76,8 +76,7 @@ class StorageManager:
 	
 	def delete_user_input(self, date=None, text_memory=None):
 		try:
-			db_path = os.path.join(os.path.dirname(__file__), "storage.db")
-			connection = sqlite3.connect(db_path)
+			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
 
 			json_text = json.dumps(text_memory)
