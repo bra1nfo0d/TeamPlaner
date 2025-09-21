@@ -4,6 +4,7 @@ from PySide6.QtGui import QFont
 from core.date_manager import get_date_str
 from core.config_manager import ConfigManager
 from widgets.clickable_label import ClickableLabel
+from windows.input_window import InputWindow
 
 class ColumnDayWidget(QWidget):
 	def __init__(self, day, date):
@@ -20,7 +21,7 @@ class ColumnDayWidget(QWidget):
 		self.frame = QFrame(self)
 		self.frame.setFrameShape(QFrame.Box)
 		self.frame.setLineWidth(2)
-		if get_date_str(day=0) == date:	
+		if get_date_str(day=0) == date:
 			self.frame.setStyleSheet(f"""border: 1px solid #ccc;
 										 border-radius: 10px;
 										 border-color: {self.today_border_color};""")
@@ -65,9 +66,11 @@ class ColumnDayWidget(QWidget):
 		self.frame_layout.addLayout(padding_layout)
 	
 	def label_clicked(self):
-		from core.window_controller import WindowController
-		self.window_controller = WindowController()
-		self.window_controller.start_input_window(self.day, self.date, self.frame_layout, self.spacer)
+#		from core.window_controller import WindowController
+		input_window = InputWindow(self.day, self.date, self.frame_layout, self.spacer)
+		input_window.show()
+#		self.window_controller = WindowController()
+#		self.window_controller.start_input_window(self.day, self.date, self.frame_layout, self.spacer)
 	
 	def return_date_frame_widgets(self):
 		return [self.date, self.frame_layout, self.spacer]

@@ -8,6 +8,7 @@ from widgets.user_input import UserInput
 from core.storage_manager import StorageManager
 from core.config_manager import ConfigManager
 
+
 class InputWindow(QWidget):
 	def __init__(self, day, date, target_layout, target_spacer):
 		super().__init__()
@@ -20,10 +21,12 @@ class InputWindow(QWidget):
 		self.target_spacer = target_spacer
 
 		self.config_manager = ConfigManager()
+		self.storage_manager = StorageManager()
 
 		self.text_memory = []
 		self.label_memory = []
 		self.label_pointer = [0, 0] # change all the list pointer to tupel
+		self.calc = 0.0
 
 		self.setWindowFlags(Qt.WindowStaysOnTopHint)
 		self.setWindowTitle(f"{day} - {date}")
@@ -32,9 +35,8 @@ class InputWindow(QWidget):
 		self.frame.setFrameShape(QFrame.Box)
 		self.frame.setLineWidth(2)
 		self.frame.setStyleSheet("""padding: 4px; 
-							    	border: 1px solid #ccc;
-					  		     	border-radius: 10px;
-					  		     """)
+							    	border: 2px solid #ccc;
+					  		     	border-radius: 10px;""")
 
 		self.drop_bar = QComboBox()
 		self.drop_bar.addItems(self.config_manager.load_config()["input_types"])
@@ -74,81 +76,105 @@ class InputWindow(QWidget):
 		up_shortcut = QShortcut(Qt.Key_Up, self.input_field)
 		up_shortcut.activated.connect(lambda: self.on_arrow_press("up"))
 
-		self.cur_input_type = self.config_manager.load_config()["input_types"][0]
-		self.on_value_changed(self.cur_input_type)
+		global first_input_type
+		first_input_type = self.config_manager.load_config()["first_input_type"]
+		self.on_value_changed(first_input_type)
 
 	def on_return(self):
-		input_field_text = self.input_field.text()
-		forbitten_pattern = r"^[_+]"
-		if input_field_text == "":
-			return
-		if re.match(forbitten_pattern, input_field_text):
-			self.show_warning(error_type="wrong_pattern")
-			return
+		entry_type = self.text_memory[self.label_pointer[0]][0]
+		entry_text = self.input_field.text()
 		label = self.label_memory[self.label_pointer[0]]
-		if self.text_memory[self.label_pointer[0]] and self.text_memory[self.label_pointer[0]][0].startswith("+"):
-			pattern = r".*#[\d]+[,.]?[\d]{,2}"
-			if re.match(pattern, input_field_text):
-				text_amount_list = input_field_text.split("#")
-				text = text_amount_list[0]
-				str_float = text_amount_list[1]
-				save_float = re.sub(r",", r".", str_float)
-				if self.text_memory[self.label_pointer[0]]:
-					cur_label_text = label.text()
-					label.setText(cur_label_text + "\n" + text)
+		cur_text = label.text()
+
+		if entry_text.startswith("*"):
+			self.show_warning(error_code=2)
+			return
+
+		if re.match(r"text", entry_type):
+			if len(self.text_memory[self.label_pointer[0]]) > 1:
+				label.setText(cur_text + "\n" + entry_text)
+			else:
+				label.setText(entry_text)
+			self.text_memory[self.label_pointer[0]].append(entry_text)
+
+		elif re.match(r"calc", entry_type):
+			pattern = r".*#\d+(?:[,.]\d{1,2})?$"
+			if re.match(pattern, entry_text):
+				text_num_list = entry_text.split("#")
+				text = text_num_list[0]
+				num = text_num_list[1]
+				if "," in num:
+					num = num.replace(",", ".")
+				
+				pre_calc_len = len(str(self.calc)) + 1
+				
+				self.calc += float(num)
+				self.calc = round(self.calc, 2)
+
+				calc_str = str(num)
+
+				if re.match(r"\d+\.\d{2}$", calc_str):
+					pass
+				elif re.match(r"\d+\.\d{1}$", calc_str):
+					calc_str = calc_str + "0"
+				elif re.match(r"\d+", calc_str):
+					calc_str = calc_str + ".00"
+
+				if re.match(r"\d+\.\d{2}$", num):
+					disp_num = num.replace(".", ",") + "€"
+				elif re.match(r"\d+\.\d{1}$", num):
+					disp_num = num.replace(".", ",") + "0€"
+				elif re.match(r"\d+$", num):
+					disp_num = num + ",00€"
+
+				if len(self.text_memory[self.label_pointer[0]]) > 1:
+					label.setText(cur_text + "\n" + text + " -> " + disp_num + "\n" + str(self.calc) + "€")
 				else:
-					label.setText(text)
-				self.text_memory[self.label_pointer[0]].append((text, float(save_float)))
-				self.input_field.clear()
+					label.setText(text + " -> " + num + "\n" + str(self.calc) + "€")
+				self.text_memory[self.label_pointer[0]].append(text + "#" + calc_str)
+
 			else:
-				self.show_warning(error_type="calc_error")
-		else:
-			print(bool(self.label_pointer[0]))
-			if self.text_memory[self.label_pointer[0]] and self.text_memory[self.label_pointer[0]][-1] != "_":
-				cur_label_text = label.text()
-				label.setText(cur_label_text + "\n" + input_field_text)
-			else:
-				label.setText(input_field_text)
-			self.text_memory[self.label_pointer[0]].append(input_field_text)
-			self.input_field.clear()
+				self.show_warning(error_code="E001")
+				return
+
+		self.input_field.clear()
+
+		print(self.calc)
 		print(self.text_memory)
-	
-	def on_delete(self):	# if header is a + header and you delete it you get an error
-		if len(self.text_memory[self.label_pointer[0]]) <= 1:
-			x = 0
-		else:
-			x = 1
-		try:
+
+
+	def on_delete(self):
+		if len(self.text_memory[self.label_pointer[0]]) > 1 and not self.text_memory[self.label_pointer[0]][-1].startswith("*"):
 			label = self.label_memory[self.label_pointer[0]]
 			cur_text = label.text()
-			if type(self.text_memory[self.label_pointer[0]][-1]) == tuple:
-				del_text = self.text_memory[self.label_pointer[0]].pop()
-				del_text = del_text[0]
+			del_text = self.text_memory[self.label_pointer[0]].pop()
+			del_text_len = len(del_text)
+			
+			if re.match(r"calc", self.text_memory[self.label_pointer[0]][0]):				
+				del_text_len += 4
+				self.calc -= float(del_text.split("#")[1])
+				self.calc = round(self.calc, 2)
+
+			if len(self.text_memory[self.label_pointer[0]]) > 1:
+				label.setText(cur_text[:len(cur_text)-del_text_len-1])
 			else:
-				del_text = self.text_memory[self.label_pointer[0]].pop()
-			label.setText(cur_text[:len(cur_text)-len(del_text)-x])
-		except IndexError:
-			pass
-		print(self.text_memory)
-	
-	def on_click(self):		# color does not come back on submit
-		display_config = self.config_manager.load_config()["input_types_config"][self.cur_input_type]
-		clac_value = self.config_manager.load_config()["calc_value"]
-		for i in range(len(self.text_memory)):
-			if self.text_memory[i][0].startswith("+"):
-				num = 0
-				for j in range(1, len(self.text_memory[i])):
-					num += self.text_memory[i][j][1]
-				if num >= clac_value:
-					display_config = ["green", "#ccc"]
-				else:
-					display_config = ["red", "#ccc"]
+				label.setText(cur_text[:len(cur_text)-del_text_len])
 		
-		user_input = UserInput(text_memory=self.text_memory, layout=self.target_layout, spacer=self.target_spacer, date=self.date, settings=display_config)
+		print(self.calc)
+		print(self.text_memory)
+
+
+	def on_click(self):
+		for l in self.text_memory:
+			if len(l) <= 1:
+				self.show_warning(error_code=3)
+				return
+		settings = self.cur_input_struct[0]
+		user_input = UserInput(text_memory=self.text_memory, layout=self.target_layout, spacer=self.target_spacer, date=self.date, settings=settings)
 		user_input.show_input()
-		storage_manager = StorageManager()
-		storage_manager.store_user_input(date=self.date, text_memory=self.text_memory, config=display_config)
-		self.clear_memory(same_type=True)
+		self.storage_manager.store_user_input(settings=settings, text_memory=self.text_memory, date=self.date)
+		self.on_value_changed(self.cur_input_struct[0][0])
+
 		
 	def clear_memory(self, same_type):
 		if not same_type:
@@ -175,36 +201,32 @@ class InputWindow(QWidget):
 									QLabel {
 						   				border: 2px solid #ccc;}""")
 
-	def on_value_changed(self, value):
-		if self.cur_input_type != value:
-			self.cur_input_type = value
-			self.clear_memory(same_type=False)
-		else:
-			if self.label_memory:
-				self.clear_memory(same_type=True)
-		self.clear_frame()
-		headers = self.config_manager.load_config()["input_types_header"][value]
-		for i in range(len(headers)):
-			self.text_memory.append([])
-			if headers[i] == "_":
+	def on_value_changed(self, input_struct):
+		self.cur_input_struct = self.config_manager.load_config()["input_types"][input_struct]
+		self.clear_content()
+		label_count = len(self.cur_input_struct) - 1
+		self.label_pointer = [0, label_count]
+		for i in range(label_count):
+			self.text_memory.append([self.cur_input_struct[i+1][1]])
+			cur_header = self.cur_input_struct[i+1][0]
+			if cur_header == "_":
 				label = QLabel()
-			elif headers[i].startswith("+"):
-				label = QLabel(headers[i][1:])
 			else:
-				label = QLabel(headers[i])
-			self.text_memory[i].append(headers[i])
+				label = QLabel(cur_header)
+				self.text_memory[i].append(f"*{cur_header}")
 			label.setAlignment(Qt.AlignCenter)
-			label.setStyleSheet("""
-								QLabel {
-					   				border: 2px solid #ccc;}""")
+			label.setContentsMargins(5, 2, 5, 2)
+			if i == 0:
+				label.setStyleSheet("""
+							border: 2px solid yellow;
+							border-radius: 10px;""")
+			else:
+				label.setStyleSheet("""
+							border: 2px solid #ccc;
+							border-radius: 10px;""")
+				
 			self.frame_layout.addWidget(label)
 			self.label_memory.append(label)
-		first_label = self.label_memory[0]
-		first_label.setStyleSheet("""
-								  QLabel {
-									border: 2px solid yellow;}""")
-		self.label_pointer = [0, len(headers)]
-		print(self.text_memory)
 	
 	def on_arrow_press(self, direction):
 		lenght = self.label_pointer[1]
@@ -227,19 +249,20 @@ class InputWindow(QWidget):
 								 QLabel {
 						   			border: 2px solid yellow;}""")
 	
-	def clear_frame(self):
-		if self.label_memory:
-			for i in range(len(self.label_memory)):
-				label = self.label_memory[i]
-				self.frame_layout.removeWidget(label)
-				label.deleteLater()
-			self.label_memory = []
+	def clear_content(self):
+		for label in self.label_memory:
+			self.frame_layout.removeWidget(label)
+			label.deleteLater()
+		self.label_memory = []
+		self.text_memory = []
 	
-	def show_warning(self, error_type):
-		if error_type == "calc_error":
-			error_text = "Die nutzer Eingabe muss folgende Form haben:\n\"MusterText\"#\"123,45\""
-		elif error_type == "wrong_pattern":
-			error_text = "Nutzereingabe darf nicht mit folgenden Zeichen beginnen: (_, +)"
+	def show_warning(self, error_code):
+		if error_code == "E001":
+			error_text = "E001"
+		elif error_code == 2:
+			error_text = "Die Nutzer Eingabe darf nicht mit einem \"*\" beginnnen"
+		elif error_code == 3:
+			error_text = "Ein Eingabefeld wurde leer gelassen."
 		msg = QMessageBox()
 		msg.setWindowFlags(msg.windowFlags() | Qt.WindowStaysOnTopHint)
 		msg.setIcon(QMessageBox.Warning)

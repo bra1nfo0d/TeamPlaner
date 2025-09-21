@@ -18,8 +18,9 @@ class StorageManager:
 						CREATE TABLE IF NOT EXISTS user_inputs (
 						id INTEGER PRIMARY KEY AUTOINCREMENT,
 						date TEXT NOT NULL,
-						text TEXT,
-						config TEXT)
+				  		type TEXT,
+						settings TEXT,
+						text TEXT)
 						""")
 			connection.commit()
 			connection.close()
@@ -32,28 +33,34 @@ class StorageManager:
 			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
 
-			cursor.execute("SELECT date, text, config FROM user_inputs")
+			dates = list(date_frame_map.keys())
+			placeholder = ",".join("?" for _ in dates)
+			query = f"SELECT date, type, settings, text FROM user_inputs WHERE date IN ({placeholder})"
+			cursor.execute(query, dates)
+			
 			rows = cursor.fetchall()
-
+			
 			for row in rows:
-				user_input = UserInput(text_memory=json.loads(row[1]), layout=date_frame_map[row[0]][0], spacer=date_frame_map[row[0]][1], date=row[0], settings=json.loads(row[2]))
+				user_input = UserInput(text_memory=json.loads(row[3]), layout=date_frame_map[row[0]][0], spacer=date_frame_map[row[0]][1], date=row[0], settings=json.loads(row[2]))
 				user_input.show_input()
+
 			
 			connection.close()
 		except Exception as ex:
 			print(ex)
 
-	def store_user_input(self, date=None, text_memory=None, config=None):
+	def store_user_input(self, date=None, text_memory=None, settings=None):
 		try:
 			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
 
 			cursor.execute("""
-						INSERT OR REPLACE INTO user_inputs (date, text, config)
-						VALUES (?, ?, ?)""", (
+						INSERT OR REPLACE INTO user_inputs (date, type, settings, text)
+						VALUES (?, ?, ?, ?)""", (
 								date,
-								json.dumps(text_memory),
-								json.dumps(config)
+								settings[0],
+								json.dumps(settings),
+								json.dumps(text_memory)
 						))
 			connection.commit()
 			connection.close()

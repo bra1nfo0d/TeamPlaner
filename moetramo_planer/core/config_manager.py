@@ -6,16 +6,15 @@ CONFIG_DIR = os.path.join(os.getenv("APPDATA"), APP_NAME)
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 
 DEFAULT_CONFIG = {
+	"language": "de",
 	"today_border_color": "#FFFF00",
 	"day_date_label_color": "#FFFFFF",
-	"input_types": ["Tour", "Termin", "Lieferung"],
-	"input_types_header": {"Tour": ["_", "Fahrzeug", "Monteure", "+Aufträge"],
-						   "Termin": ["_", "Mitarbeiter", "Typ", "Zeit"],
-						   "Lieferung": ["Lieferung"]},
-	"input_types_config": {"Tour": ["#ccc", "#ccc"],
-						   "Termin": ["#ccc", "#ccc"],
-						   "Lieferung": ["#0000FF", "#ccc"]},
-	"calc_value": 1000.00
+	"first_input_type": "Tour",
+	"input_types": {"Tour": [("Tour", 1, "#ccc", "#ccc"), ("_", "text"), ("Fahrzeug", "text"), ("Monteure", "text"), ("Aufträge", ("calc#1000"))],
+				 	"Termin": [("Termin", 2, "#ccc", "#ccc"), ("_", "text"), ("Mitarbeiter", "text"), ("Zeit", "text")],
+					"Lieferung": [("Lieferung", 3, "#ccc", "#0000FF"), ("Lieferung", "text")]},
+	"calc_true_color": "#008000",
+	"calc_false_color": "#ff0000"
 }
 
 class ConfigManager:

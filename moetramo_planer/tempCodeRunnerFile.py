@@ -1,4 +1,2 @@
 
-from core.storage_manager import StorageManager
-
-def main():
+	palette.setColor(QPalette.BrightText, Qt.red)
