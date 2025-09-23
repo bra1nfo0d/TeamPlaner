@@ -141,17 +141,17 @@ Feedback, reviews, and suggestions for improvements are very welcome!
 Weekly Overview
 Shows multiple weeks side by side with their planned tasks.
 
-![Weekly Overview](assets/screenshots/screenshot1.png)
+![Weekly Overview](assets/screenshot1.png)
 
 Input Window
 Structured form for entering tasks, tours, or deliveries.
 
-![Input Window](assets/screenshots/screenshot2.png)
+![Input Window](assets/screenshot2.png)
 
 Edit Window
 Modify or delete an existing entry. This example shows editing a **Tour** input:
 
-![Edit Window](assets/screenshots/screenshot2.png)
+![Edit Window](assets/screenshot2.png)
 
 🛠️ Tech Stack
 ---
