@@ -2,9 +2,9 @@ import sys
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPalette, QColor
 from PySide6.QtCore import Qt
-from windows.main_window import MainWindow
-from core.storage_manager import StorageManager
-from core.config_manager import ConfigManager
+from team_planer.windows.main_window import MainWindow
+from team_planer.core.storage_manager import StorageManager
+from team_planer.core.config_manager import ConfigManager
 
 class App:
 	"""

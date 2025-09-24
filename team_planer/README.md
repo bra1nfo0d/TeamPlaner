@@ -194,7 +194,13 @@ pip install -r requirements.txt
 Run the application:
 
 ```bash
-python main.py
+python -m team_planer.main
+```
+
+Run a test:
+
+```bash
+pytest -v
 ```
 
 🚧 Roadmap / TODO

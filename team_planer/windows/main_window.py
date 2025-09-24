@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget
 from PySide6.QtGui import QKeySequence, QShortcut
-from widgets.day_view import DayView
-from core.date_manager import DateManager
-from core.storage_manager import StorageManager
-from core.config_manager import ConfigManager
+from team_planer.widgets.day_view import DayView
+from team_planer.core.date_manager import DateManager
+from team_planer.core.storage_manager import StorageManager
+from team_planer.core.config_manager import ConfigManager
 
 class MainWindow(QMainWindow):
 	"""

@@ -1,5 +1,5 @@
 import datetime as dt
-from core.config_manager import ConfigManager
+from team_planer.core.config_manager import ConfigManager
 
 # TODO: make the internal logic with one specific date format (create a date format converter)
 class DateManager:
@@ -23,7 +23,7 @@ class DateManager:
 		self.date_format = config["date_format"]
 
 	# TODO: implement the other date formats
-	def get_date_str(self, day: int = 0) -> str:
+	def get_date_str(self, day: int = 0, date_format: str | None = None) -> str:
 		"""
 		Return a formatted date string for a given day offset from today.
 
@@ -38,71 +38,32 @@ class DateManager:
 			- Currently, only the "dd.mm.yyyy" format is implemented.
 			- Other formats return the string "ERROR".
 		"""
-		tday = dt.date.today()
-		date = str(tday + dt.timedelta(day))
+		tdate = dt.date.today()
+		date = str(tdate + dt.timedelta(day))
+		day = date[8:]
+		month = date[5:7]
+		year_yyyy = date[:4]
+		year_yy = date[2:4]
 
-		if self.date_format == "dd.mm.yyyy":
-			return f"{date[8:]}.{date[5:7]}.{date[:4]}"
-		
-		elif self.date_format == "dd/mm/yyyy":
-			return "ERROR"
-		elif self.date_format == "dd.mm.yy":
-			return "ERROR"
-		elif self.date_format == "dd/mm/yy":
-			return "ERROR"
-		elif self.date_format == "mm.dd.yyyy":
-			return "ERROR"
-		elif self.date_format == "mm/dd/yyyy":
-			return "ERROR"
-		elif self.date_format == "mm.dd.yy":
-			return "ERROR"
-		elif self.date_format == "mm/dd/yy":
-			return "ERROR"
-		else:
-			return "ERROR"
+		if date_format is None:
+			date_format = self.date_format
 
-	# TODO: implement the other date formats
-	def get_date_str_list(self, week: int = 0) -> list[str]:
-		"""
-		Return a list of formatted date strings for a given week offset.
-
-		Args:
-			week (int, optional): The number of weeks to offset from the current week.
-									Defaults to 0 (current week).
-		
-		Returns:
-			list[str]: A list of 8 formatted date strings representing the days
-						of the week (starting from Monday).
-
-		Notes:
-			- Currently, only the "dd.mm.yyyy" format is implemented.
-			- Other formats return the string "ERROR".
-		"""
-		date_list = []
-		tday = dt.date.today()
-		weekday = dt.date.today().weekday()
-		date_weekday0 = tday - dt.timedelta(weekday) + dt.timedelta(week * 7)
-
-		if self.date_format == "dd.mm.yyyy":
-			for i in range(8):
-				date = str(date_weekday0 + dt.timedelta(i))
-				date_list.append(f"{date[8:]}.{date[5:7]}.{date[:4]}")
-			return date_list
-		
-		elif self.date_format == "dd/mm/yyyy":
-			return "ERROR"
-		elif self.date_format == "dd.mm.yy":
-			return "ERROR"
-		elif self.date_format == "dd/mm/yy":
-			return "ERROR"
-		elif self.date_format == "mm.dd.yyyy":
-			return "ERROR"
-		elif self.date_format == "mm/dd/yyyy":
-			return "ERROR"
-		elif self.date_format == "mm.dd.yy":
-			return "ERROR"
-		elif self.date_format == "mm/dd/yy":
-			return "ERROR"
+		if date_format == "dd.mm.yyyy":
+			return f"{day}.{month}.{year_yyyy}"
+		elif date_format == "dd/mm/yyyy":
+			return f"{day}/{month}/{year_yyyy}"
+		elif date_format == "dd.mm.yy":
+			return f"{day}.{month}.{year_yy}"
+		elif date_format == "dd/mm/yy":
+			return f"{day}/{month}/{year_yy}"
+		elif date_format == "mm.dd.yyyy":
+			return f"{month}.{day}.{year_yyyy}"
+		elif date_format == "mm/dd/yyyy":
+			return f"{month}/{day}/{year_yyyy}"
+		elif date_format == "mm.dd.yy":
+			return f"{month}.{day}.{year_yy}"
+		elif date_format == "mm/dd/yy":
+			return f"{month}/{day}/{year_yy}"		
 		else:
 			return "ERROR"
 

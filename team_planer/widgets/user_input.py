@@ -1,9 +1,9 @@
 import re
 from PySide6.QtWidgets import QLabel, QVBoxLayout
 from PySide6.QtCore import Qt
-from widgets.clickable_frame import ClickableFrame
-from core.config_manager import ConfigManager
-from windows.edit_window import EditWindow
+from team_planer.widgets.clickable_frame import ClickableFrame
+from team_planer.core.config_manager import ConfigManager
+from team_planer.windows.edit_window import EditWindow
 
 
 class UserInput:

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import Qt
-from core.config_manager import ConfigManager
+from team_planer.core.config_manager import ConfigManager
 
 class ErrorWindow(QMessageBox):
 	"""

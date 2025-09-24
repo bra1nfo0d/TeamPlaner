@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import json
-from windows.error_window import ErrorWindow
+from team_planer.windows.error_window import ErrorWindow
 
 APP_NAME = "TeamPlaner"
 DATA_DIR = os.path.join(os.getenv("APPDATA"), APP_NAME)
@@ -67,7 +67,7 @@ class StorageManager:
 			- Creates `UserInput` objects for each entry.
 			- Injects them into the corresponding frame in the UI.
 		"""
-		from widgets.user_input import UserInput
+		from team_planer.widgets.user_input import UserInput
 		try:
 			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()

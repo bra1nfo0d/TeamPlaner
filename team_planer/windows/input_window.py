@@ -5,11 +5,11 @@ from PySide6.QtWidgets import(
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QShortcut
-from windows.error_window import ErrorWindow
-from widgets.custom_input_bind import CustomLineEdit
-from widgets.user_input import UserInput
-from core.storage_manager import StorageManager
-from core.config_manager import ConfigManager
+from team_planer.windows.error_window import ErrorWindow
+from team_planer.widgets.custom_input_bind import CustomLineEdit
+from team_planer.widgets.user_input import UserInput
+from team_planer.core.storage_manager import StorageManager
+from team_planer.core.config_manager import ConfigManager
 
 class InputWindow(QWidget):
 	"""
