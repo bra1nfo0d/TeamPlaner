@@ -194,7 +194,13 @@ pip install -r requirements.txt
 Run the application:
 
 ```bash
-python main.py
+python -m team_planer.main
+```
+
+Run a test:
+
+```bash
+pytest -v
 ```
 
 🚧 Roadmap / TODO
@@ -217,15 +223,15 @@ python main.py
 🆕 Latest Update
 ---
 
-v0.2 – Code cleanup & documentation
+v0.2.1 – Add core test files and support for additional date formats
 
-- Added detailed docstrings across core modules and widgets.
+- Added pytest test files covering core modules (date_manager, storage_manager, config_manager)
 
-- Cleaned up code style and improved naming consistency.
+- Implemented tests for all supported date formats in DateManager
 
-- Improved maintainability by splitting logic into smaller setup methods.
+- Improved reliability of configuration handling with default checks
 
-- Updated project structure for clarity (core/, widgets/, windows/).
+- Set up dev dependencies for testing
 
 📂 Project Structure
 ---
