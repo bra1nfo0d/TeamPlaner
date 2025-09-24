@@ -52,6 +52,7 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
+			print(ex, "create_db")
 
 	def load_user_data(self, date_frame_connection: map) -> None:
 		"""
@@ -85,14 +86,15 @@ class StorageManager:
 					row[0],
 					json.loads(row[3]),
 					json.loads(row[2]),
-					date_frame_connection[row[0][0]],
-					date_frame_connection[row[0][1]]
+					date_frame_connection[row[0]][0],
+					date_frame_connection[row[0]][1]
 				)
 				user_input._show_input()
 
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
+			print(ex, "load_db")
 
 	def store_user_input(self,
 					  date: str,
@@ -125,6 +127,7 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
+			print(ex)
 
 	def delete_db(self) -> None:
 		"""
@@ -141,6 +144,7 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
+			print(ex)
 	
 	def delete_user_input(self, date: str, text_memory: list[list[str]]) -> None:
 		"""
@@ -163,6 +167,7 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
+			print(ex)
 	
 	def show_warning(self, error_code: str) -> None:
 		error_window = ErrorWindow(error_code, self.parent)
