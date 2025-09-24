@@ -236,29 +236,36 @@ v0.2.1 – Add core test files and support for additional date formats
 📂 Project Structure
 ---
 
-<pre>team_planer/
+<pre>
+team_planer/
 │
-├─ core/                # Config, storage, and date management
+├─ core/                         # Config, storage, and date management
 │   ├─ config_manager.py
 │   ├─ storage_manager.py
 │   └─ date_manager.py
 │
-├─ widgets/             # Custom reusable PySide6 widgets
+├─ widgets/                      # Custom reusable PySide6 widgets
 │   ├─ clickable_frame.py
 │   ├─ clickable_label.py
 │   ├─ custom_line_edit.py
 │   └─ ...
 │
-├─ windows/             # Application windows (UI screens)
+├─ windows/                      # Application windows (UI screens)
 │   ├─ main_window.py
 │   ├─ input_window.py
 │   ├─ edit_window.py
 │   ├─ error_window.py
 │   └─ ...
 │
-├─ main.py              # Application entry point
-├─ requirements.txt     # List of dependencies
-└─ README.md            # Documentation for GitHub and job applications</pre>
+├─ tests/                        # ✅ New test suite
+│   ├─ test_date_manager.py      # Unit tests for DateManager (all formats + errors)
+│   ├─ test_storage_manager.py   # Unit tests for SQLite storage (CRUD + integration)
+│   └─ test_config_manager.py    # Unit tests for config loading & saving
+│
+├─ main.py                       # Application entry point
+├─ requirements.txt              # List of dependencies
+└─ README.md                     # Documentation for GitHub and job applications
+</pre>
 
 🤝 Contributing
 ---
