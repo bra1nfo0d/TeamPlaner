@@ -86,8 +86,9 @@ class MainWindow(QMainWindow):
 		days = config["weekday_list"]
 
 		for i in range(self.weeks_shown):
+			date_list = self.date_manager.get_date_str_list(week = i + self.cur_week)
 			for j in range(len(days)):
-				date = self.date_manager.get_date_str(j + ((self.cur_week + i) * 7))
+				date = date_list[j]
 				day_widget = DayView(days[j], date)
 				self.widget_layout.addWidget(day_widget)
 
