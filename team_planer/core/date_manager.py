@@ -66,7 +66,28 @@ class DateManager:
 			return f"{month}/{day}/{year_yy}"		
 		else:
 			return "ERROR"
+			
+	def get_date_str_list(self, week: int = 0, date_format: str | None = None):
+		if date_format is None:
+			date_format = self.date_format
 
+		date_list = []
+		tday = dt.date.today()
+		weekday = dt.date.today().weekday()
+		date_weekday0 = tday - dt.timedelta(weekday) + dt.timedelta(week * 7)
+		if date_format == "dd.mm.yyyy":
+			for i in range(8):
+				date = str(date_weekday0 + dt.timedelta(i))
+				date_list.append(f"{date[8:]}.{date[5:7]}.{date[:4]}")
+			return date_list
+		elif date_format == "ddmmyyyy":
+			return "not yet implemented"
+		elif date_format == "mmddyyyy":
+			return "not yet implemented"
+		elif date_format == "ddmmyy":
+			return "not yet implemented"
+		elif date_format == "mmddyy":
+			return "not yet implemented"
 
 if __name__ == "__main__":
 	pass
