@@ -5,6 +5,7 @@ from team_planer.core.date_manager import DateManager
 from team_planer.core.storage_manager import StorageManager
 from team_planer.core.config_manager import ConfigManager
 
+
 class MainWindow(QMainWindow):
 	"""
 	The main application window for displaying multiple weeks in a calendar view.
@@ -25,7 +26,7 @@ class MainWindow(QMainWindow):
 		widget_layout (QHBoxLayout): The layout holding the week views.
 	"""
 
-	def __init__(self, weeks: int):
+	def __init__(self, weeks_shown: int, is_main_window: bool = True, start_week: int = 0):
 		"""
 		Initialize the main window.
 
@@ -37,15 +38,18 @@ class MainWindow(QMainWindow):
 		self.config_manager = ConfigManager()
 		self.date_manager = DateManager()
 
-		self.cur_week = 0
-		self.weeks_shown = weeks
+		self.is_main_window = is_main_window
+		self.cur_week = start_week
+		self.weeks_shown = weeks_shown
 		self.date_frame_connection = {}
 		self.cur_week_widgets = []
+		self.window_memory = []
 
 		self._setup_window()
 		self._setup_layouts()
 		self._setup_shortcuts()
 		self._setup_weekdays()
+		self._setup_additional_window()
 	
 	def _setup_window(self) -> None:
 		"""
@@ -58,9 +62,13 @@ class MainWindow(QMainWindow):
 		"""
 		Initialize the central widget and main horizontal layout.
 		"""
-		central_widget = QWidget()
-		self.widget_layout = QHBoxLayout(central_widget)
-		self.setCentralWidget(central_widget)
+		if isinstance(self, QMainWindow):
+			central_widget = QWidget()
+			self.widget_layout = QHBoxLayout(central_widget)
+			self.setCentralWidget(central_widget)
+		else:
+			layout = QHBoxLayout(self)
+			self.widget_layout = layout
 
 	def _setup_shortcuts(self) -> None:
 		"""
@@ -74,6 +82,21 @@ class MainWindow(QMainWindow):
 
 		shortcut_right = QShortcut(QKeySequence("Right"), self)
 		shortcut_right.activated.connect(lambda: self._week_view_change(1))
+
+	def _setup_additional_window(self):
+		"""
+    	Initialize and show additional week view windows based on the
+    	'window_shown' config value, keeping references for synchronization.
+    	"""
+		config = self.config_manager.load_config()
+		windows = config["window_shown"]
+
+		for d in range(windows):
+			if d > 0 and self.is_main_window:
+				from team_planer.windows.additonal_display_window import AdditonalWindow
+				self.additional_window = AdditonalWindow(self, self.cur_week)
+				self.additional_window.showMaximized()
+				self.window_memory.append(self.additional_window)
 	
 	def _setup_weekdays(self) -> None:
 		"""
@@ -101,21 +124,44 @@ class MainWindow(QMainWindow):
 	
 	def _week_view_change(self, val: int) -> None:
 		"""
-		Change which weeks are displayed in the main view.
+		Update the displayed week view and synchronize changes across all windows.
+
+		Applies the given week offset to update the currently visible weeks.
+		The change is propagated to all linked windows stored in `window_memory`,
+		ensuring synchronized navigation between multiple week views.
 
 		Args:
-			val (int): Offset to apply to the current week index.
-						- Negetiv = go to past weeks
-						- Posetive = go to future weeks
+			val (int): The week offset to apply.
+						Negative values move to past weeks,
+						positive values move to future weeks.
 		"""
+		if hasattr(self, "window_memory"):
+			for window in self.window_memory:
+				if window is not self:
+					window._refresh_week_view(val)
+		self._refresh_week_view(val)
+
+	def _refresh_week_view(self, val: int):
+		"""
+    	Refresh the currently displayed week view.
+
+    	Updates the current week index by the given offset, clears all existing
+    	day widgets and their connections, then rebuilds the week layout and
+    	reloads user data to reflect the updated state.
+    
+    	Args:
+        	val (int): The week offset to apply. Negative values move backward,
+                   positive values move forward.
+    	"""
 		self.cur_week += val
 
 		for widget in self.cur_week_widgets:
 			widget.setParent(None)
 			widget.deleteLater()
 
-		self.cur_week_widgets = []
-		self.date_frame_connection = {}
+		self.cur_week_widgets.clear()
+		self.date_frame_connection.clear()
+		
 		self._setup_weekdays()
 		self.storage_manager.load_user_data(self.date_frame_connection)
 
