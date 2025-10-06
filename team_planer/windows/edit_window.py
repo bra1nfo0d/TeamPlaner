@@ -167,7 +167,7 @@ class EditWindow(QWidget):
 		Create a button to delete the current input entirely.
 		"""
 		delete_button = QPushButton("Delete")
-		delete_button.clicked.connect(self.delete_user_input)
+		delete_button.clicked.connect(self._delete_user_input)
 		self.input_layout.addWidget(delete_button)
 	
 	def _setup_spacer(self) -> None:
@@ -197,7 +197,7 @@ class EditWindow(QWidget):
 		shift_return_shortcut = QShortcut(QKeySequence(Qt.SHIFT | Qt.Key_Return), self)
 		shift_return_shortcut.activated.connect(self._add_text_label)
 
-	def delete_user_input(self) -> None:
+	def _delete_user_input(self) -> None:
 		"""
 		Permanently delete this input from storage and the UI.
 		Removes the corresponding frame and closes the edit window.
@@ -225,7 +225,7 @@ class EditWindow(QWidget):
 					if not re.match(pattern, self.text_memory[i][k]):
 						self._show_warning(error_code="E001")
 						return
-		self.storage_manager.delete_user_input(self.date, self.text_memory)
+		self.storage_manager.delete_user_input(self.date, self.past_text_memory)
 		if self.user_input.layout:
 			self.user_input.layout.removeWidget(self.user_input.frame)
 		self.user_input.frame.setParent(None)
@@ -255,7 +255,6 @@ class EditWindow(QWidget):
 				text = self.text_memory[i][1][1:]
 				for j in range(2, len(self.text_memory[i])):
 					text_num = self.text_memory[i][j].split("#")
-					print(text_num)
 					text_snipped = text_num[0]
 					num_snipped = text_num[1]
 					if "," in num_snipped:
@@ -321,6 +320,7 @@ class EditWindow(QWidget):
 		"""
 		Clear and rebuild the editable content labels.
 		"""
+		self.storage_manager.delete_user_input(self.date, self.past_text_memory)
 		for label in self.edit_label_memory:
 			label.deleteLater()		
 		self.edit_label_memory = []
@@ -364,7 +364,6 @@ class EditWindow(QWidget):
 						   border-color: yellow;
 						   """)
 			new_text = self.text_memory[self.text_focus][self.edit_focus+1]
-			print(new_text)
 			if new_text.startswith("*"):
 				self.text_input.setReadOnly(True)
 				self.text_input.setText("")
@@ -462,6 +461,7 @@ class EditWindow(QWidget):
 				return
 			if re.match(r"calc", self.text_memory[self.text_focus][0]) and not re.match(r".*#\d+(?:[,.]\d{2})?$", text):
 				self._show_warning(error_code="E001")
+				return
 			label.setText(text)
 			self.text_memory[self.text_focus][self.edit_focus+1] = text
 			self._delete_cur_input_view()
