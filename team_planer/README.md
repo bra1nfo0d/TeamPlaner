@@ -210,7 +210,7 @@ pytest -v
 
 - Improve error dialogs (better headers & visibility).
 
-- Add unit tests for storage, input and config workflows.
+- Add more unit tests for storage, input and config workflows.
 
 - Add localization (multi-language support).
 
@@ -223,15 +223,17 @@ pytest -v
 🆕 Latest Update
 ---
 
-v0.2.1 – Add core test files and support for additional date formats
+v0.3.0 – Multi-window week views and dark theme improvements
 
-- Added pytest test files covering core modules (date_manager, storage_manager, config_manager)
+- Added multi-window support via the new AdditionalWindow class, allowing multiple week views to be displayed simultaneously.
 
-- Implemented tests for all supported date formats in DateManager
+- Introduced new config option "window_shown" to control how many windows open at once.
 
-- Improved reliability of configuration handling with default checks
+- Implemented synchronized week navigation across all open windows using a shared window list and _refresh_week_view() helper.
 
-- Set up dev dependencies for testing
+- Improved dark theme compatibility — text input and text edit fields now render correctly on all systems.
+
+- Refactored internal layout logic for better cross-window consistency.
 
 📂 Project Structure
 ---
