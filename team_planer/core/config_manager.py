@@ -9,6 +9,7 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 DEFAULT_CONFIG = {				  
 	"language": "de",
 	"window_title": "moetramo Planer",
+	"window_shown": 2,
 	"weeks_shown": 2,
 	"date_format": "dd.mm.yyyy",
 	"weekday_list": (
