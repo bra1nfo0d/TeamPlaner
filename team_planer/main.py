@@ -21,21 +21,30 @@ class App:
 		"""
 		Apply a dark theme palette to the application.
 		"""
+		self.app.setStyle("Fusion")
+
 		palette = QPalette()
-		palette.setColor(QPalette.Window, QColor(53, 53, 53))
+
+		# Base background colors
 		palette.setColor(QPalette.Window, QColor(53, 53, 53))
 		palette.setColor(QPalette.WindowText, Qt.white)
-		palette.setColor(QPalette.Base, QColor(35, 35, 35))
-		palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+		palette.setColor(QPalette.Base, QColor(35, 35, 35))           # text edit background
+		palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))  # alternating rows
 		palette.setColor(QPalette.ToolTipBase, Qt.white)
 		palette.setColor(QPalette.ToolTipText, Qt.white)
+	
+		# Text colors
 		palette.setColor(QPalette.Text, Qt.white)
 		palette.setColor(QPalette.Button, QColor(53, 53, 53))
 		palette.setColor(QPalette.ButtonText, Qt.white)
 		palette.setColor(QPalette.BrightText, Qt.red)
+		palette.setColor(QPalette.PlaceholderText, QColor(180, 180, 180))
+
+		# Links and selection
 		palette.setColor(QPalette.Link, QColor(42, 130, 218))
 		palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-		palette.setColor(QPalette.HighlightedText, Qt.black)
+		palette.setColor(QPalette.HighlightedText, Qt.white)
+
 		self.app.setPalette(palette)
 
 	def run(self) -> None:
