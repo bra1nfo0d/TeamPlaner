@@ -7,43 +7,23 @@ from team_planer.windows.edit_window import EditWindow
 
 
 class UserInput:
-	"""
-	Displays the user input on the main window.
+	"""Creates a clickable frame showing stored user input or calcultions."""
 
-	A UserInput object creates a styled frame that shows either text entries
-	or calculated numeric entries, based on the configuration. The frame is
-	clickable and opens an `EditWindow` for modifying or deleting the entry.
-
-	Attributs:
-		config_manager (ConfigManager): Provides access to configuration values.
-		date (str): The date associated with this user input.
-		text_memory (list[list[str]]): Nested list storing input data and metadata.
-		setting (list[str]): Settings for the input type (e.g., colors, validation).
-		layout (object): The target PySide layout where this input frame is placed.
-		spacer (object): The spacer item used in the target layout.
-		label_memory (list[QLabel]): Keeps track of QLabel widgets displaying input.
-		calc (float): Running total for numeric ("calc") inputs.
-		goal (int | str): Target number for calculations, or "_" if unused.
-		frame (ClickableFrame): The clickable frame containing the input display.
-		frame_layout (QVBoxLayout): Layout managing labels inside the frame.
-		padding_layout (QVBoxLayout): Layout for spacing the frame inside the parent.
-	"""
-
-	def __init__(self,
-			  date: str,
-			  text_memory: list[list[str]],
-			  settings: list[str],
-			  layout: object,
-			  spacer: object,):
+	def __init__(
+			self,
+			date: str,
+			text_memory: list[list[str]],
+			settings: list[str],
+			layout: object,
+			spacer: object
+	):
 		"""
-		Initialize a UserInput object.
-
 		Args:
-			date (str): The date associated with this input.
-			text_memory (list[list[str]]): Stored user input data.
-			settings (list[str]): Input configuration (colors, type info).
-			layout (object): The layout in which this frame should appear.
-			spacer (object): Spacer item from the parent layout.
+			date (str): Associated date.
+			text_memory (list[list[str]]): Stored input data.
+			settings (list[str]): Input configuration (color, type info).
+			layout (object): Target layout where the frame is added.
+			spacer (object): Spacer item from parent layout.
 		"""
 		self.config_manager = ConfigManager()
 
@@ -61,22 +41,13 @@ class UserInput:
 		self._setup_style()
 	
 	def _setup_frame(self) -> None:
-		"""
-		Create the clickable frame and attach a layout to hold labels.
-
-		Connects the frame's `clicked` signal to open the edit window.
-		"""
+		"""Create clickable frame and connect click signal."""
 		self.frame = ClickableFrame()
 		self.frame_layout = QVBoxLayout(self.frame)
 		self.frame.clicked.connect(lambda: self._click())
 
 	def _setup_input_content(self) -> None:
-		"""
-		Populate the frame with labels representing stored user input.
-
-		- For text entries: display each line of text.
-		- For calc entries: display the text, accumulate totals, and store goals.
-		"""
+		"""Add labels for text or numeric input data."""
 		for i in range(len(self.text_memory)):
 			label = QLabel()
 			self.label_memory.append(label)
@@ -113,12 +84,7 @@ class UserInput:
 				label.setAlignment(Qt.AlignCenter)
 		
 	def _setup_style(self) -> None:
-		"""
-		Apply styles to the frame and labels.
-
-		- If numeric input: color depends on whether the goal was reached.
-		- If text input: colors are taken directly from settings.
-		"""
+		"""Apply color styling based on settings and calc results."""
 		if isinstance(self.goal, int):
 			config = self.config_manager.load_config()
 			if self.calc >= self.goal:
@@ -141,12 +107,7 @@ class UserInput:
 		""")
 
 	def _show_input(self) -> None:
-		"""
-		Insert this UserInput frame into the target layout.
-
-		Removes the existing spacer, adds the frame inside a padding layout,
-		and then re-inserts the spacer below it.
-		"""
+		"""Insert the frame into the layout, keeping spacer order."""
 		self.padding_layout = QVBoxLayout()
 		self.padding_layout.setContentsMargins(0, 0, 0, 5)
 		spacer = self.spacer
@@ -156,12 +117,7 @@ class UserInput:
 		self.layout.addItem(spacer)
 
 	def _click(self) -> None:
-		"""
-		Handle clicks on the frame.
-
-		Opens an `EditWindow` that allows the user to modify or delete
-		the current UserInput entry.
-		"""
+		"""Open edit window for this entry."""
 		self.edit_window = EditWindow(
 			date=self.date,
 			text_memory=self.text_memory,
