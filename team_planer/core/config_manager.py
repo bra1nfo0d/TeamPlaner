@@ -50,33 +50,19 @@ DEFAULT_CONFIG = {
 }
 
 class ConfigManager:
-	"""
-	Handles loading and saving of application configuration.
-
-	Configurations are stored as JSON in the user's AppData directory.
-	If no configuration exists, a default one is created.
-
-	Atrributes:
-		config (dict): The currently loaded configuration dictionary.
-	"""
+	"""Manages loading and saving the app config."""
 
 	def __init__(self):
-		"""
-		Initialize the ConfigManager.
-
-		Ensures the config directory exists and loads the configuration.
-		If no config file is present, saves the default configuration.
-		"""
+		"""Initialize ConfigManager."""
 		os.makedirs(CONFIG_DIR, exist_ok=True)
 		self.config = self.load_config()
 
 	def load_config(self) -> dict:
 		"""
-		Load the configuration from disk.
+		Load the configuration file or create a default one.
 
 		Returns:
-			dict: The loaded configuration dictionary.
-					Falls back to DEFAULT_CONFIG if the file does not exist.
+			dict: The current configuration.
 		"""
 		if not os.path.exists(CONFIG_FILE):
 			self.save_config(DEFAULT_CONFIG)
@@ -96,8 +82,7 @@ class ConfigManager:
 		Save the configuration to disk.
 
 		Args:
-			config (dict, optional): The configuration to save.
-										If None, saves the current self.config.
+			config (dict, optional): Config to save. Defaults to self.config.
 		"""
 		if config is None:
 			config = self.config
