@@ -5,6 +5,7 @@ from team_planer.core.storage_manager import StorageManager
 
 @pytest.fixture
 def temp_db(tmp_path, monkeypatch):
+	"""Creates temporary SQLite DB and initialize schema."""
 	test_db = tmp_path / "test_storage.db"
 	monkeypatch.setattr(sm_mod, "DB_FILE", str(test_db))
 	sm = StorageManager()
@@ -12,6 +13,7 @@ def temp_db(tmp_path, monkeypatch):
 	return sm
 
 def test_create_db_creates_table():
+	"""Ensure 'user_inputs' table is created."""
 	connection = sqlite3.connect(sm_mod.DB_FILE)
 	cursor = connection.cursor()
 	cursor.execute("""
@@ -23,6 +25,7 @@ def test_create_db_creates_table():
 	connection.close()
 
 def test_store_and_load_user_input(temp_db):
+	"""Insert and read back stored user input."""
 	date = "01.01.2025"
 	text_memory = [["text", "test_header"]]
 	settings = ["set_1", "set_2", "set_3", "set_4"]
@@ -48,6 +51,7 @@ def test_store_and_load_user_input(temp_db):
 	connection.close()
 
 def test_delete_user_input(temp_db):
+	"""Delete a specific user input entry."""
 	date = "01.01.2025"
 	text_memory = [["text", "test_header"]]
 	settings = ["set_1", "set_2", "set_3", "set_4"]
@@ -72,6 +76,7 @@ def test_delete_user_input(temp_db):
 	connection.close()
 
 def test_load_user_date_creates_user_input(temp_db, monkeypatch):
+	"""Verify loading user data instantiates UserInput and calls '_show_input'."""
 	date = "01.01.2025"
 	text_memory = [["text", "test_header"]]
 	settings = ["set_1", "set_2", "set_3", "set_4"]
