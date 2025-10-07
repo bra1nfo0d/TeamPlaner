@@ -3,6 +3,7 @@ from team_planer.core.config_manager import ConfigManager, CONFIG_FILE, DEFAULT_
 
 @pytest.fixture
 def temp_config_dir(tmp_path, monkeypatch):
+	"""Create temporary config path for isolated testing."""
 	test_dir = tmp_path / "TeamPlanerTest"
 	test_file = test_dir / "config.json"
 	monkeypatch.setattr("team_planer.core.config_manager.CONFIG_DIR", str(test_dir))
@@ -10,6 +11,7 @@ def temp_config_dir(tmp_path, monkeypatch):
 	return test_file
 
 def test_load_config_creates_file_with_defaults():
+	"""Ensure config loads defaults and creates file if missing."""
 	cm = ConfigManager()
 	config = cm.load_config()
 
@@ -28,6 +30,7 @@ def test_load_config_creates_file_with_defaults():
 		assert normalize(default_value) == normalize(config[key])
 
 def test_save_config_overwrites_file(temp_config_dir):
+	"""Verify that saving updates the config file"""
 	cm = ConfigManager()
 	cm.config["language"] = "en"
 	cm.save_config()
