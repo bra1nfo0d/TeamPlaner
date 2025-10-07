@@ -8,34 +8,19 @@ DATA_DIR = os.path.join(os.getenv("APPDATA"), APP_NAME)
 DB_FILE = os.path.join(DATA_DIR, "storage.db")
 
 class StorageManager:
-	"""
-	Handles saving and loading user input data to a SQLite database.
-
-	The database stores user inputs with date, type, settings, and text content.
-	Data is serialized to JSON for storage and deserialized on load.
-	"""
+	"""Handles reading and writing user data to the SQLite database."""
 
 	# TODO: Change the doc with parent
 	def __init__(self, parent: object | None = None):
 		"""
-		Initialize the StorageManager.
-
-		Ensures that the data directory exists so the database file can be created.
+		Args:
+			parent (object | None): Parent window or controller.
 		"""
 		self.parent = parent
 		os.makedirs(DATA_DIR, exist_ok=True)
 
 	def create_db(self) -> None:
-		"""
-		Create the database schema if it does not exist.
-
-		Creates a table `user_inputs` with the following columns:
-			- id (int, primary key, autoincrement)
-			- date (str, required): Date associated with the input.
-			- type (str): The type/category of the input.
-			- settings (str): JSON-encoded settings for the input.
-			- text (str): JSON-encoded user input data.
-		"""
+		"""Create the database and 'user_inputs' table if not existing."""
 		try:
 			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
@@ -52,20 +37,13 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
-			print(ex, "create_db")
 
 	def load_user_data(self, date_frame_connection: map) -> None:
 		"""
-		Load user data from the database and render it in the UI.
+		Load user inputs from the database into connected UI frames.
 
 		Args:
-			date_frame_connection (map): Maps a date string to a tuple
-											(layout, spacer) for UI rendering.
-							
-		Side Effects:
-			- Queries database for all inputs matching provided dates.
-			- Creates `UserInput` objects for each entry.
-			- Injects them into the corresponding frame in the UI.
+			date_frame_connection (map): Maps a date string to (layout, spacer).
 		"""
 		from team_planer.widgets.user_input import UserInput
 		try:
@@ -94,22 +72,15 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
-			print(ex, "load_db")
 
-	def store_user_input(self,
-					  date: str,
-					  text_memory: list[list[str]],
-					  settings: list[str]) -> None:
+	def store_user_input(self, date: str, text_memory: list[list[str]], settings: list[str]) -> None:
 		"""
-		Save a new user input to the database.
-
-		If an entry with the same date and type already exists,
-		it will be replaced.
+		Store a user input entry.
 
 		Args:
-			date (str): Date of the input.
-			text_memory (list[list[str]]): Nested list of user input data.
-			settings (list[str]): Input configuration (JSON-encoded).
+			date (str): Input date.
+			text_memory (list[list[str]]): Input content.
+			settings (list[str]): Input metadata.
 		"""
 		try:
 			connection = sqlite3.connect(DB_FILE)
@@ -127,15 +98,9 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
-			print(ex)
 
 	def delete_db(self) -> None:
-		"""
-		Delete all entries from the database.
-
-		Warnings:
-			This clears the entire `user_inputs` table.
-		"""
+		"""Delete all entries form the database."""
 		try:
 			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
@@ -144,16 +109,14 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
-			print(ex)
 	
 	def delete_user_input(self, date: str, text_memory: list[list[str]]) -> None:
 		"""
-		Delete a specific user input from the database.
+		Delete a specific user input.
 
 		Args:
-			date (str): Date of the input to delete.
-			text_memory (list[list[str]]): The content of the input
-											(must match JSON stored in DB).
+			date (str): Date of the entry.
+			text_memory (list[list[str]]): Input content to match.
 		"""
 		try:
 			connection = sqlite3.connect(DB_FILE)
@@ -167,9 +130,14 @@ class StorageManager:
 			connection.close()
 		except Exception as ex:
 			self.show_warning("E004")
-			print(ex)
 	
 	def show_warning(self, error_code: str) -> None:
+		"""
+		Display an error window.
+
+		Args:
+			error_code (str): Error code to display.
+		"""
 		error_window = ErrorWindow(error_code, self.parent)
 		error_window.exec()
 
