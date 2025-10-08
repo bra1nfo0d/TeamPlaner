@@ -11,51 +11,26 @@ from team_planer.core.storage_manager import StorageManager
 from team_planer.windows.error_window import ErrorWindow
 
 class EditWindow(QWidget):
-	"""
-	A window that allows editing of an existing UserInput entry.
+	"""Window for editing an existing UserInput entry."""
 
-	Provider:
-		- A display frame showing the original content.
-		- An editable frame showing individual text/calculation items.
-		- Shortcuts for navigating between inputs and frames.
-		- Buttons to change, delete, or update entries.
-		- Validation and error handling.
-
-	Attributs:
-		storage_manager (StorageManager): Handles persistent input storage.
-		user_input (object): Reference to the original UserInput object.
-		date (str): Date associated with the input being edited.
-		text_memory (list[list[str]]): Current editable copy of the input content.
-		past_text_memory (list[list[str]]): Deep copy of the original input for reference.
-		settings (list[str]): Configuration values for this input.
-		layout (object): Layout of the parent container holding this input.
-		spacer (object): Spacer used in the parent layout.
-		padding (object): Padding layout for this input’s frame.
-		text_focus (int): Index of the currently focused input group.
-		frame_focus (int): Indicates which frame is active (0=display, 1=edit).
-		edit_focus (int): Index of the currently focused label in edit mode.
-		label_memory (list[QLabel]): Labels used in the display frame.
-		edit_label_memory (list[QLabel]): Labels used in the editable frame.
-	"""
-
-	def __init__(self,
-			  date: str,
-			  text_memory: list[list[str]],
-			  settings: list[str],
-			  user_input: object,
-			  layout: object,
-			  spacer: object,
-			  padding: object):
+	def __init__(
+			self,
+			date: str,
+			text_memory: list[list[str]],
+			settings: list[str],
+			user_input: object,
+			layout: object,
+			spacer: object,
+			padding: object
+	):
 		"""
-		Initialize the edit window.
-
 		Args:
-			date (str): Date associated with this input.
+			date (str): Date of the input.
 			text_memory (list[list[str]]): Input content to edit.
-			settings (list[str]): Input configuration.
-			user_input (object): Original UserInput instance being edited.
-			layout (object): Parent layout containing the input.
-			spacer (object): Spacer item in the parent layout.
+			settings (list[str]): Input content to edit.
+			user_input (object): Original UserInput instance.
+			layout (object): Parent layout.
+			spacer (object): Parent spacer.
 			padding (object): Padding layout of the input frame.
 		"""
 		super().__init__()
@@ -88,9 +63,7 @@ class EditWindow(QWidget):
 		self._setup_edit_content()
 
 	def _setup_window(self) -> None:
-		"""
-		Configure window size, title, and always-on-top behavior.
-		"""
+		"""Configure size, title, and always-on-top behavior."""
 		self.resize(400, 400)
 		self.setWindowFlags(Qt.WindowStaysOnTopHint)
 		try:
@@ -103,9 +76,7 @@ class EditWindow(QWidget):
 		self.setWindowTitle(f"{header} - {self.date}")
 
 	def _setup_layout(self) -> None:
-		"""
-		Create the main layout with display, edit, and input columns.
-		"""
+		"""Create main layout with display, edit, and input columns."""
 		self.display_frame_layout = QVBoxLayout()
 		self.edit_frame_layout = QVBoxLayout()
 		self.row1_layout = QVBoxLayout()
@@ -117,9 +88,7 @@ class EditWindow(QWidget):
 		main_layout.addLayout(self.input_layout)
 	
 	def _setup_display_frame(self) -> None:
-		"""
-		Create the display frame showing the current input content.
-		"""
+		"""Create frame showing current input content."""
 		self.display_frame = QFrame()
 		self.display_frame.setLayout(self.display_frame_layout)
 		self.display_frame.setStyleSheet("""
@@ -131,9 +100,7 @@ class EditWindow(QWidget):
 		self.row1_layout.addWidget(self.display_frame)
 
 	def _setup_edit_frame(self) -> None:
-		"""
-		Create the editable frame showing detailed labels of the input.
-		"""
+		"""Create frame showing editable labels."""
 		self.edit_frame = QFrame()
 		self.edit_frame.setLayout(self.edit_frame_layout)
 		self.edit_frame.setStyleSheet("""
@@ -145,9 +112,7 @@ class EditWindow(QWidget):
 		self.row2_layout.addWidget(self.edit_frame)
 	
 	def _setup_text_input(self) -> None:
-		"""
-		Create a read-only input field for editing entries.
-		"""
+		"""Create text input field for editing."""
 		self.text_input = CustomLineEdit()
 		self.text_input.setReadOnly(True)
 		self.text_input.returnPressed.connect(self._on_return)
@@ -155,34 +120,26 @@ class EditWindow(QWidget):
 		self.input_layout.addWidget(self.text_input)
 	
 	def _setup_change_button(self) -> None:
-		"""
-		Create a button to confirm and apply changes to the input.
-		"""
+		"""Add button to apply changes."""
 		change_button = QPushButton("Change")
 		change_button.clicked.connect(self._change_user_input)
 		self.input_layout.addWidget(change_button)
 	
 	def _setup_delete_button(self) -> None:
-		"""
-		Create a button to delete the current input entirely.
-		"""
+		"""Add button to delete entry."""
 		delete_button = QPushButton("Delete")
 		delete_button.clicked.connect(self._delete_user_input)
 		self.input_layout.addWidget(delete_button)
 	
 	def _setup_spacer(self) -> None:
-		"""
-		Add expanding spacers for proper layout alignment.
-		"""
+		"""Add expanding spacer for layout alignment."""
 		spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 		self.row1_layout.addItem(spacer)
 		self.row2_layout.addItem(spacer)
 		self.input_layout.addItem(spacer)
 
 	def _setup_shortcuts(self) -> None:
-		"""
-		Register navigation and edit keyboard shortcuts.
-		"""
+		"""Register navigation and edit shortcuts."""
 		down_shortcut = QShortcut(Qt.Key_Down, self)
 		down_shortcut.activated.connect(lambda: self._change_text_focus(1))
 		up_shortcut = QShortcut(Qt.Key_Up, self)
@@ -198,10 +155,7 @@ class EditWindow(QWidget):
 		shift_return_shortcut.activated.connect(self._add_text_label)
 
 	def _delete_user_input(self) -> None:
-		"""
-		Permanently delete this input from storage and the UI.
-		Removes the corresponding frame and closes the edit window.
-		"""	
+		"""Delete input from storage and remove from UI."""
 		self.storage_manager.delete_user_input(self.date, self.text_memory)
 		if self.user_input.layout:
 			self.user_input.layout.removeWidget(self.user_input.frame)
@@ -210,13 +164,7 @@ class EditWindow(QWidget):
 		self.close()
 	
 	def _change_user_input(self) -> None:
-		"""
-		Validate and apply changes to the input.
-
-		- Validates calc entries against the expected format.
-		- Replaces the old UserInput with an updated one.
-		- Updates persistent storage.
-		"""
+		"""Validate and apply edits to user input."""
 		from team_planer.widgets.user_input import UserInput
 		for i in range(len(self.text_memory)):
 			if re.match(r"calc", self.text_memory[i][0]):
@@ -243,10 +191,7 @@ class EditWindow(QWidget):
 		self.close()
 
 	def _setup_display_content(self) -> None:
-		"""
-		Populate the display frame with formatted labels
-		showing the current text or calculation entries.
-		"""
+		"""Fill display frame with formatted labels."""
 		for i in range(len(self.text_memory)):
 			label = QLabel()
 			self.label_memory.append(label)
@@ -284,18 +229,14 @@ class EditWindow(QWidget):
 			label.setContentsMargins(5, 2, 5, 2)
 	
 	def _delete_cur_input_view(self) -> None:
-		"""
-		Clear and rebuild the display content labels.
-		"""
+		"""Rebuild display labels."""
 		for label in self.label_memory:
 			label.deleteLater()
 		self.label_memory = []
 		self._setup_display_content()
 	
 	def _setup_edit_content(self) -> None:
-		"""
-		Populate the edit frame with editable labels for the focused entry.
-		"""
+		"""Fill edit frame with editable labels."""
 		for i in range(1, len(self.text_memory[self.text_focus])):
 			label = QLabel()
 			text = self.text_memory[self.text_focus][i]
@@ -317,9 +258,7 @@ class EditWindow(QWidget):
 			label.setContentsMargins(5, 2, 5, 2)
 
 	def _delete_cur_edit_view(self) -> None:
-		"""
-		Clear and rebuild the editable content labels.
-		"""
+		"""Rebuild editable labels."""
 		self.storage_manager.delete_user_input(self.date, self.past_text_memory)
 		for label in self.edit_label_memory:
 			label.deleteLater()		
@@ -327,12 +266,7 @@ class EditWindow(QWidget):
 		self._setup_edit_content()
 
 	def _change_text_focus(self, val: int) -> None:
-		"""
-		Change the focus to another entry label.
-
-		Args:
-			val (int): +1 for next entry, -1 for previous entry.
-		"""
+		"""Move text or label selection focus."""
 		if self.frame_focus == 0:
 			cur_label = self.label_memory[self.text_focus]
 			cur_label.setStyleSheet("""
@@ -372,9 +306,7 @@ class EditWindow(QWidget):
 				self.text_input.setText(self.text_memory[self.text_focus][self.edit_focus+1])
 
 	def _switch_frame_focus(self) -> None:
-		"""
-		Toggle between focusing the display frame and the edit frame.
-		"""
+		"""Toggle focus between display and edit frame."""
 		self.frame_focus = (self.frame_focus+1)%2
 		if self.frame_focus == 0:
 			self.display_frame.setStyleSheet("""
@@ -412,14 +344,9 @@ class EditWindow(QWidget):
 			else:
 				self.text_input.setReadOnly(False)
 				self.text_input.setText(self.text_memory[self.text_focus][self.edit_focus+1])
-
-	#TODO: Disable fix header delete	
+	
 	def _on_delete(self) -> None:
-		"""
-		Handle delete key press in edit mode.
-
-		Removes the currently focused label (unless it's a fixed header).
-		"""
+		"""Delete current editable label (except headers)."""
 		if self.frame_focus == 1 and len(self.edit_label_memory) > 1:
 			label = self.edit_label_memory[self.edit_focus]
 			del_text = self.text_memory[self.text_focus][self.edit_focus+1]
@@ -448,11 +375,7 @@ class EditWindow(QWidget):
 			self._delete_cur_input_view()
 
 	def _on_return(self) -> None:
-		"""
-		Handle return/enter key press in edit mode.
-
-		Updates the currently focused entry with new text from the input field.
-		"""
+		"""Update focused label text form input."""
 		if self.frame_focus == 1 and not self.text_memory[self.text_focus][self.edit_focus+1].startswith("*"):
 			label = self.edit_label_memory[self.edit_focus]
 			text = self.text_input.text()
@@ -467,9 +390,7 @@ class EditWindow(QWidget):
 			self._delete_cur_input_view()
 
 	def _add_text_label(self) -> None:
-		"""
-		Add a new empty text label below the current one in edit mode.
-		"""
+		"""Add new text label below current edit label."""
 		if self.frame_focus == 1:
 			self.text_memory[self.text_focus].insert(self.edit_focus+2, "")
 			self.edit_focus = self.edit_focus+1
@@ -479,7 +400,7 @@ class EditWindow(QWidget):
 
 	def _show_warning(self, error_code: str) -> None:
 		"""
-		Show an error popup with the given code.
+		Show error popup.
 
 		Args:
 			error_code (str): Error identifier (e.g., 'E001').
@@ -488,9 +409,7 @@ class EditWindow(QWidget):
 		error_window.exec()
 
 	def closeEvent(self, event) -> None:
-		"""
-		Cleanup on close and accept the close event.
-		"""
+		"""Clean up on close."""
 		del self
 		event.accept()
 
