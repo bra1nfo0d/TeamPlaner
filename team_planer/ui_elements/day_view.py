@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from team_planer.core.date_manager import DateManager
 from team_planer.core.config_manager import ConfigManager
-from team_planer.ui_elements.clickable_label import ClickableLabel
+from team_planer.ui_elements.clickable_widgets import ClickableLabel
 from team_planer.windows.input_window import InputWindow
 
 class DayView(QWidget):
