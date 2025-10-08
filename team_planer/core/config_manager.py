@@ -6,10 +6,10 @@ CONFIG_DIR = os.path.join(os.getenv("APPDATA"), APP_NAME)
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 
 # Default configuration settings for the application
-DEFAULT_CONFIG = {				  
+DEFAULT_CONFIG = {
 	"language": "de",
 	"window_title": "moetramo Planer",
-	"window_shown": 2,
+	"window_shown": 1,
 	"weeks_shown": 2,
 	"date_format": "dd.mm.yyyy",
 	"weekday_list": (
