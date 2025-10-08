@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QShortcut, QKeySequence
-from team_planer.widgets.custom_input_bind import CustomLineEdit
+from team_planer.ui_elements.custom_input_bind import CustomLineEdit
 from team_planer.core.storage_manager import StorageManager
 from team_planer.windows.error_window import ErrorWindow
 
@@ -165,7 +165,7 @@ class EditWindow(QWidget):
 	
 	def _change_user_input(self) -> None:
 		"""Validate and apply edits to user input."""
-		from team_planer.widgets.user_input import UserInput
+		from team_planer.ui_elements.user_input import UserInput
 		for i in range(len(self.text_memory)):
 			if re.match(r"calc", self.text_memory[i][0]):
 				for k in range(2, len(self.text_memory[i])):
