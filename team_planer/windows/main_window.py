@@ -64,8 +64,8 @@ class MainWindow(QMainWindow):
 
 		for d in range(windows):
 			if d > 0 and self.is_main_window:
-				from team_planer.windows.additonal_display_window import AdditonalWindow
-				self.additional_window = AdditonalWindow(self, self.cur_week)
+				from team_planer.windows.additional_window import AdditionalWindow
+				self.additional_window = AdditionalWindow(self, self.cur_week)
 				self.additional_window.showMaximized()
 				self.window_memory.append(self.additional_window)
 	
