@@ -90,7 +90,7 @@ def test_load_user_date_creates_user_input(temp_db, monkeypatch):
 	)
 
 	test_user_input = MagicMock()
-	monkeypatch.setattr("team_planer.widgets.user_input.UserInput", test_user_input)
+	monkeypatch.setattr("team_planer.ui_elements.user_input.UserInput", test_user_input)
 	
 	sm.load_user_data(dfc)
 
