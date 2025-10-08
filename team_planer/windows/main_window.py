@@ -7,31 +7,14 @@ from team_planer.core.config_manager import ConfigManager
 
 
 class MainWindow(QMainWindow):
-	"""
-	The main application window for displaying multiple weeks in a calendar view.
-
-	This window displays a configurable number of weeks, each with its weekday
-	columns. It supports navigation between past and future weeks using keyboard
-	shortcuts, and manages the connection between dates and their corresponding
-	UI elements.
-
-	Attributs:
-		storage_manager (StorageManager): Handles user data persistence.
-		config_manager (ConfigManager): Loads application configuration values.
-		date_manager (DateManager): Provides date string utilities.
-		cur_week (int): The currently displayed week index (0 = current week).
-		weeks_shown (int): Number of weeks displayed at once.
-		date_frame_connection (dict): Maps date frames to their connected elements.
-		cur_week_widgets (list[DayView]): List of DayView widgets currently displayed.
-		widget_layout (QHBoxLayout): The layout holding the week views.
-	"""
+	"""Main calendar window showing multiple weeks and days."""
 
 	def __init__(self, weeks_shown: int, is_main_window: bool = True, start_week: int = 0):
 		"""
-		Initialize the main window.
-
 		Args:
-			weeks (int): The number of weeks to display at once.
+			weeks (int): Number of weeks displayed at once.
+			is_main_window (bool): Whether this is the primary window.
+			start_week (int): Starting week offset (0 = current).
 		"""
 		super().__init__()
 		self.storage_manager = StorageManager(self)
@@ -52,16 +35,12 @@ class MainWindow(QMainWindow):
 		self._setup_additional_window()
 	
 	def _setup_window(self) -> None:
-		"""
-		Configure the window title and other high-level settings.
-		"""
+		"""Set window title from config."""
 		config = self.config_manager.load_config()
 		self.setWindowTitle(config["window_title"])
 
 	def _setup_layouts(self) -> None:
-		"""
-		Initialize the central widget and main horizontal layout.
-		"""
+		"""Initialize central widget and main horizontal layout."""
 		if isinstance(self, QMainWindow):
 			central_widget = QWidget()
 			self.widget_layout = QHBoxLayout(central_widget)
@@ -71,12 +50,7 @@ class MainWindow(QMainWindow):
 			self.widget_layout = layout
 
 	def _setup_shortcuts(self) -> None:
-		"""
-		Register keyboard shortcuts for navigating weeks.
-
-		- Left Arrow → move to previous week
-		- Right Arrow → move to next week
-		"""
+		"""Add keyboard shortcuts for week navigation."""
 		shortcut_left = QShortcut(QKeySequence("Left"), self)
 		shortcut_left.activated.connect(lambda: self._week_view_change(-1))
 
@@ -84,10 +58,7 @@ class MainWindow(QMainWindow):
 		shortcut_right.activated.connect(lambda: self._week_view_change(1))
 
 	def _setup_additional_window(self):
-		"""
-    	Initialize and show additional week view windows based on the
-    	'window_shown' config value, keeping references for synchronization.
-    	"""
+		"""Open additional week display windows from config."""
 		config = self.config_manager.load_config()
 		windows = config["window_shown"]
 
@@ -99,12 +70,7 @@ class MainWindow(QMainWindow):
 				self.window_memory.append(self.additional_window)
 	
 	def _setup_weekdays(self) -> None:
-		"""
-		Populate the window with DayView widgets for the current range of weeks.
-
-		Uses the configured weekday list and the current week index to generate
-		all displayed day widgets, and stores their frame connections.
-		"""
+		"""Build and display all DayView widgets for current weeks."""
 		config = self.config_manager.load_config()
 		days = config["weekday_list"]
 
@@ -124,16 +90,10 @@ class MainWindow(QMainWindow):
 	
 	def _week_view_change(self, val: int) -> None:
 		"""
-		Update the displayed week view and synchronize changes across all windows.
-
-		Applies the given week offset to update the currently visible weeks.
-		The change is propagated to all linked windows stored in `window_memory`,
-		ensuring synchronized navigation between multiple week views.
+		Change visible week and sync all open windows.
 
 		Args:
-			val (int): The week offset to apply.
-						Negative values move to past weeks,
-						positive values move to future weeks.
+			val (int): Week offset. Negative = past, positive = future.
 		"""
 		if hasattr(self, "window_memory"):
 			for window in self.window_memory:
@@ -143,16 +103,11 @@ class MainWindow(QMainWindow):
 
 	def _refresh_week_view(self, val: int):
 		"""
-    	Refresh the currently displayed week view.
+		Refresh currently shown week(s) and reload user data.
 
-    	Updates the current week index by the given offset, clears all existing
-    	day widgets and their connections, then rebuilds the week layout and
-    	reloads user data to reflect the updated state.
-    
-    	Args:
-        	val (int): The week offset to apply. Negative values move backward,
-                   positive values move forward.
-    	"""
+		Args:
+			val (int): Week offset to apply.
+		"""
 		self.cur_week += val
 
 		for widget in self.cur_week_widgets:
@@ -166,12 +121,7 @@ class MainWindow(QMainWindow):
 		self.storage_manager.load_user_data(self.date_frame_connection)
 
 	def get_date_frame_connection(self) -> dict:
-		"""
-		Return the current mapping of date frames to their connected elements.
-
-		Return:
-			dict: A dictionary mapping date frame keys to their associated elements.
-		"""
+		"""Return the current date-to-frame connection map."""
 		return self.date_frame_connection
 
 
