@@ -12,28 +12,7 @@ from team_planer.core.storage_manager import StorageManager
 from team_planer.core.config_manager import ConfigManager
 
 class InputWindow(QWidget):
-	"""
-	A popup window for entering and managing user input for a specific day.
-
-	The window provides:
-		- A drop-down bar for selecting input types.
-		- A text input field that supports both text and calculated entries.
-		- A dynamic frame that displays labels for each input field.
-		- Shortcuts for navigating between labels (Up/Down).
-		- Validation and error handling through ErrorWindow.
-	
-	Attributs:
-		config_manager (ConfigManager): Loads input type configurations.
-		storage_manager (StorageManager): Handles storing user data to persistence.
-		day (str): The name of the weekday this input belongs to.
-		date (str): The formatted date string for this input window.
-		target_layout (object): The layout in the parent DayView to which input will be added.
-		target_spacer (object): The spacer item in the parent DayView.
-		text_memory (list): Stores user-entered text values.
-		label_memory (list): Stores QLabel widgets representing input fields.
-		label_pointer (list[int, int]): Current position and total number of labels.
-		calc (float): Keeps track of calculated numeric totals.
-	"""
+	"""Popup for entering and managing user input from specific day."""
 
 	def __init__(self,
 			  day: str,
@@ -41,13 +20,11 @@ class InputWindow(QWidget):
 			  target_layout: object,
 			  target_spacer: object):
 		"""
-		Initialize the input window.
-
 		Args:
-			day (str): The weekday name.
-			date (str): The formatted date string.
-			target_layout (object): The layout in the parent DayView to append inputs.
-			target_spacer (object): Spacer item used in the parent layout.
+			day (str): Weekday name.
+			date (str): Formatted date string.
+			target_layout (object): Parent DayView layout.
+			target_spacer (object): Parent layout spacer.
 		"""
 		super().__init__()
 		self.config_manager = ConfigManager()
@@ -73,26 +50,20 @@ class InputWindow(QWidget):
 		self._setup_input_view([""])
 
 	def _setup_window(self) -> None:
-		"""
-		Configure window size, title, and always-on-top behavior.
-		"""
+		"""Configure size, title, and always-on-top behavior."""
 		self.resize(400, 400)
 		self.setFixedSize(400, 400)
 		self.setWindowFlags(Qt.WindowStaysOnTopHint)
 		self.setWindowTitle(f"{self.day} - {self.date}")
 
 	def _setup_spacer(self) -> None:
-		"""
-		Add an expanding spacer to both layout columns.
-		"""
+		"""Add expanding spacer for layout balance."""
 		self.spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 		self.row1.addItem(self.spacer)
 		self.row2.addItem(self.spacer)
 
 	def _setup_frame(self) -> None:
-		"""
-		Create and style the main frame where dynamic labels will be placed.
-		"""
+		"""Main frame where dynamic labels are placed."""
 		self.frame = QFrame()
 		self.frame.setLayout(self.frame_layout)
 		self.frame.setFrameShape(QFrame.Box)
@@ -106,17 +77,13 @@ class InputWindow(QWidget):
 		self.row1.addWidget(self.frame)
 
 	def _setup_submit_button(self) -> None:
-		"""
-		Create a submit button and connect it to the click handler.
-		"""
+		"""Add submit button."""
 		self.submit_button = QPushButton("Submit")
 		self.submit_button.clicked.connect(self._on_click)
 		self.row2.addWidget(self.submit_button)
 
 	def _setup_text_input(self) -> None:
-		"""
-		Create the main text input field with custom signals for Enter and Delete.
-		"""
+		"""Add main text input with Enter/Delete signals."""
 		self.text_input = CustomLineEdit()
 		self.text_input.setStyleSheet("""
 								background-color: #121212;
@@ -126,9 +93,7 @@ class InputWindow(QWidget):
 		self.row2.addWidget(self.text_input)
 
 	def _setup_drop_bar(self) -> None:
-		"""
-		Create a drop-down bar for selecting input types.
-		"""
+		"""Add dropdown for selecting input types."""
 		self.drop_bar = QComboBox()
 		self.drop_bar.addItems(self.config_manager.load_config()["input_types"])
 		self.drop_bar.setStyleSheet("""
@@ -138,9 +103,7 @@ class InputWindow(QWidget):
 		self.row2.addWidget(self.drop_bar)
 
 	def _setup_layouts(self) -> None:
-		"""
-		Initialize the main horizontal layout with two vertical columns.
-		"""
+		"""Main layout: two vertical columns in a horizontal layout."""
 		self.frame_layout = QVBoxLayout()
 		self.row1 = QVBoxLayout()
 		self.row2 = QVBoxLayout()
@@ -150,9 +113,7 @@ class InputWindow(QWidget):
 		main_layout.addLayout(self.row2)
 
 	def _setup_shortcuts(self) -> None:
-		"""
-		Register keyboard shortcuts for navigating between labels.
-		"""
+		"""Keyboard navigation shortcuts."""
 		down_shortcut = QShortcut(Qt.Key_Down, self.text_input)
 		down_shortcut.activated.connect(lambda: self._on_arrow_press(1))
 
@@ -161,11 +122,10 @@ class InputWindow(QWidget):
 
 	def _setup_input_view(self, input_type: list[str]) -> None:
 		"""
-		Build the label view for the selected input type.
+		Build label view for selected input type.
 
 		Args:
-			input_type (list[str]): The type of input selected from the drop-down.
-									If empty, defaults to the configured first type.
+			input_type (list[str]): Selected input type, defaults to first config type.
 		"""
 		if input_type == [""]:
 			config = self.config_manager.load_config()
@@ -200,12 +160,7 @@ class InputWindow(QWidget):
 
 	# TODO: Fix the total show with a calc input
 	def _on_return(self) -> None:
-		"""
-		Handle the Return/Enter key press.
-
-		- For text entries: appends to the current label.
-		- For calc entries: validates and calculates numeric totals.
-		"""
+		"""Add or calculate entry for the current label."""
 		entry_type = self.text_memory[self.label_pointer[0]][0]
 		entry_text = self.text_input.text()
 		label = self.label_memory[self.label_pointer[0]]
@@ -254,11 +209,7 @@ class InputWindow(QWidget):
 		self.text_input.clear()
 
 	def _on_delete(self) -> None:
-		"""
-		Handle the Delete key press.
-
-		Removes the last entry from the current label and updates totals if needed.
-		"""
+		"""Delete last entry from the current label."""
 		if len(self.text_memory[self.label_pointer[0]]) > 1 and not self.text_memory[self.label_pointer[0]][-1].startswith("*"):
 			label = self.label_memory[self.label_pointer[0]]
 			cur_text = label.text()
@@ -274,12 +225,7 @@ class InputWindow(QWidget):
 				label.setText(cur_text[:len(cur_text)-del_text_len])
 
 	def _on_click(self) -> None:
-		"""
-		Handle submit button click.
-
-		Validates all inputs, creates a UserInput object, stores data
-		in StorageManager, and resets the input view.
-		"""
+		"""Validate input and save as UserInput."""
 		for l in self.text_memory:
 			if len(l) <= 1:
 				self._show_warning(error_code="E003")
@@ -302,12 +248,11 @@ class InputWindow(QWidget):
 		
 	def _clear_memory(self, same_type: bool) -> None:
 		"""
-		Reset label and text memory.
+		Reset labels and text state.
 
 		Args:
-			same_type (bool): 
-				- If True, keep existing labels and reset only text.
-				- If False, remove and recreate labels completely.
+			same_type (bool): 	If True, keep current labels/headers and clear values.
+								If False, remove labels and reset everything.
 		"""
 		if not same_type:
 			self.text_memory = []
@@ -338,12 +283,7 @@ class InputWindow(QWidget):
 						   }""")
 	
 	def _on_arrow_press(self, val: int) -> None:
-		"""
-		Move the active label selection up or down.
-
-		Args:
-			val (int): +1 for next label, -1 for previous label.
-		"""
+		"""Move focus between labels."""
 		lenght = self.label_pointer[1]
 		pointer = self.label_pointer[0]
 		calc = (pointer+val)%lenght
@@ -364,9 +304,7 @@ class InputWindow(QWidget):
 						  }""")
 	
 	def _clear_content(self) -> None:
-		"""
-		Remove all labels and reset memory structures.
-		"""
+		"""Remove all labels and reset memory."""
 		for label in self.label_memory:
 			self.frame_layout.removeWidget(label)
 			label.deleteLater()
@@ -375,10 +313,10 @@ class InputWindow(QWidget):
 	
 	def _show_warning(self, error_code: str) -> None:
 		"""
-		Display an error popup window.
+		Show an error popup.
 
 		Args:
-			error_code (str): The error code to display in the ErrorWindow.
+			error_code (str): Error code identifier.
 		"""
 		error_window = ErrorWindow(error_code, self)
 		error_window.exec()
