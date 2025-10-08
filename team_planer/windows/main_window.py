@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QHBoxLayout, QWidget
-from PySide6.QtGui import QKeySequence, QShortcut
-from team_planer.widgets.day_view import DayView
+from PySide6.QtGui import QKeySequence, QShortcut, Qt
+from team_planer.ui_elements.day_view import DayView
 from team_planer.core.date_manager import DateManager
 from team_planer.core.storage_manager import StorageManager
 from team_planer.core.config_manager import ConfigManager
@@ -50,12 +50,18 @@ class MainWindow(QMainWindow):
 			self.widget_layout = layout
 
 	def _setup_shortcuts(self) -> None:
-		"""Add keyboard shortcuts for week navigation."""
+		"""Add keyboard shortcuts for week navigation and fullscreen mode."""
 		shortcut_left = QShortcut(QKeySequence("Left"), self)
 		shortcut_left.activated.connect(lambda: self._week_view_change(-1))
 
 		shortcut_right = QShortcut(QKeySequence("Right"), self)
 		shortcut_right.activated.connect(lambda: self._week_view_change(1))
+
+		shortcut_f11 = QShortcut(QKeySequence(Qt.Key_F11), self)
+		shortcut_f11.activated.connect(self._toogle_fullscreen)
+
+		shortcut_escape = QShortcut(QKeySequence(Qt.Key_Escape), self)
+		shortcut_escape.activated.connect(self._exit_fullscreen)
 
 	def _setup_additional_window(self):
 		"""Open additional week display windows from config."""
@@ -119,6 +125,18 @@ class MainWindow(QMainWindow):
 		
 		self._setup_weekdays()
 		self.storage_manager.load_user_data(self.date_frame_connection)
+
+	def _toogle_fullscreen(self):
+		"""Toogles between fullscreen mode."""
+		if self.isFullScreen():
+			self.showMaximized()
+		else:
+			self.showFullScreen()
+
+	def _exit_fullscreen(self):
+		"""Escapes fullscreen mode."""
+		if self.isFullScreen():
+			self.showMaximized()
 
 	def get_date_frame_connection(self) -> dict:
 		"""Return the current date-to-frame connection map."""
