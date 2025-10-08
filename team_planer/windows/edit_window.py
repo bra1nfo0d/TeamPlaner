@@ -2,13 +2,13 @@ import copy
 import re
 from PySide6.QtWidgets import (
 	QWidget, QFrame, QHBoxLayout, QVBoxLayout, QPushButton,
-	QSpacerItem, QSizePolicy, QLabel
+	QSpacerItem, QSizePolicy, QLabel, QMessageBox
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QShortcut, QKeySequence
 from team_planer.ui_elements.custom_input_bind import CustomLineEdit
 from team_planer.core.storage_manager import StorageManager
-from team_planer.windows.error_window import ErrorWindow
+from team_planer.windows.warning_window import PopupWindow
 
 class EditWindow(QWidget):
 	"""Window for editing an existing UserInput entry."""
@@ -156,12 +156,14 @@ class EditWindow(QWidget):
 
 	def _delete_user_input(self) -> None:
 		"""Delete input from storage and remove from UI."""
-		self.storage_manager.delete_user_input(self.date, self.text_memory)
-		if self.user_input.layout:
-			self.user_input.layout.removeWidget(self.user_input.frame)
-		self.user_input.frame.setParent(None)
-		self.user_input.frame.deleteLater()
-		self.close()
+		result = self._show_warning("accept", "E001")
+		if result:
+			self.storage_manager.delete_user_input(self.date, self.text_memory)
+			if self.user_input.layout:
+				self.user_input.layout.removeWidget(self.user_input.frame)
+			self.user_input.frame.setParent(None)
+			self.user_input.frame.deleteLater()
+			self.close()
 	
 	def _change_user_input(self) -> None:
 		"""Validate and apply edits to user input."""
@@ -171,7 +173,7 @@ class EditWindow(QWidget):
 				for k in range(2, len(self.text_memory[i])):
 					pattern = r".*#\d+(?:[,.]\d{2})?$"
 					if not re.match(pattern, self.text_memory[i][k]):
-						self._show_warning(error_code="E001")
+						self._show_warning(text_code="E001")
 						return
 		self.storage_manager.delete_user_input(self.date, self.past_text_memory)
 		if self.user_input.layout:
@@ -380,10 +382,10 @@ class EditWindow(QWidget):
 			label = self.edit_label_memory[self.edit_focus]
 			text = self.text_input.text()
 			if text.startswith("*"):
-				self._show_warning(error_code="E002")
+				self._show_warning(text_code="E002")
 				return
 			if re.match(r"calc", self.text_memory[self.text_focus][0]) and not re.match(r".*#\d+(?:[,.]\d{2})?$", text):
-				self._show_warning(error_code="E001")
+				self._show_warning(text_code="E001")
 				return
 			label.setText(text)
 			self.text_memory[self.text_focus][self.edit_focus+1] = text
@@ -398,15 +400,17 @@ class EditWindow(QWidget):
 			self.text_input.setReadOnly(False)
 			self.text_input.setText("")
 
-	def _show_warning(self, error_code: str) -> None:
+	def _show_warning(self, popup_type: str, text_code: str) -> bool:
 		"""
-		Show error popup.
+		Show popup window.
 
 		Args:
-			error_code (str): Error identifier (e.g., 'E001').
+			popup_type (str): Type of the popup (e.g., 'error')
+			text_code (str): Text identifier (e.g., 'E001').
 		"""
-		error_window = ErrorWindow(error_code, self)
-		error_window.exec()
+		error_window = PopupWindow(popup_type, text_code, self)
+		result = error_window.exec()
+		return result == QMessageBox.Ok
 
 	def closeEvent(self, event) -> None:
 		"""Clean up on close."""
