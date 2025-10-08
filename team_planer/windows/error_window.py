@@ -3,25 +3,13 @@ from PySide6.QtCore import Qt
 from team_planer.core.config_manager import ConfigManager
 
 class ErrorWindow(QMessageBox):
-	"""
-	A popup window for displaying error messages.
-
-	This class extends `QMessageBox` to create a standardized error dialog
-	using error codes that map to headers and texts in the application
-	configuration.
-
-	Attributes:
-		config_manager (ConfigManager): Loads error message texts from config.
-		error_code (str): The code identifying which error message to display.
-	"""
+	"""Popup window showing error message from config."""
 
 	def __init__(self, error_code: str, parent: object | None = None):
 		"""
-		Initialize the error window.
-
 		Args:
-			error_code (str): Key used to look up the error message in config.
-			parent (object): The parent widget for this dialog.
+			error_code (str): Error code used to look up massage text.
+			parent (object): Parent widget.
 		"""
 		super().__init__(parent)
 		self.config_manager = ConfigManager()
@@ -29,12 +17,7 @@ class ErrorWindow(QMessageBox):
 
 	# TODO: Fix the visibility issues with the error header and text
 	def _setup_window(self) -> None:
-		"""
-		Configure the QMessageBox window based on the error code.
-
-		Loads the error header and text from the configuration, applies
-		styles, sets the warning icon, and adds a standard OK button.
-		"""
+		"""Configurate window title, text, and icon from config."""
 		config = self.config_manager.load_config()
 		error_header_text = config[self.error_code]
 		error_header = error_header_text[0]
