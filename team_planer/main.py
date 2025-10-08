@@ -7,9 +7,7 @@ from team_planer.core.storage_manager import StorageManager
 from team_planer.core.config_manager import ConfigManager
 
 class App:
-	"""
-	Main application controller.
-	"""
+	"""Main application controller."""
 
 	def __init__(self):
 		self.storage_manager = StorageManager()
@@ -18,9 +16,7 @@ class App:
 		self.app = QApplication(sys.argv)
 
 	def _setup_dark_mode(self) -> None:
-		"""
-		Apply a dark theme palette to the application.
-		"""
+		"""Apply a dark theme palette to the application."""
 		self.app.setStyle("Fusion")
 
 		palette = QPalette()
@@ -48,9 +44,7 @@ class App:
 		self.app.setPalette(palette)
 
 	def run(self) -> None:
-		"""
-		Starts the application event loop.
-		"""
+		"""Starts the application event loop."""
 		self._setup_dark_mode()
 		config = self.config_manager.load_config()
 		self.main_window = MainWindow(config["weeks_shown"])
