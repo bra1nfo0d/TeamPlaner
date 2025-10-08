@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import json
-from team_planer.windows.error_window import ErrorWindow
+from team_planer.windows.warning_window import PopupWindow
 
 APP_NAME = "TeamPlaner"
 DATA_DIR = os.path.join(os.getenv("APPDATA"), APP_NAME)
@@ -138,7 +138,7 @@ class StorageManager:
 		Args:
 			error_code (str): Error code to display.
 		"""
-		error_window = ErrorWindow(error_code, self.parent)
+		error_window = PopupWindow("error", error_code, self.parent)
 		error_window.exec()
 
 
