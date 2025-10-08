@@ -45,7 +45,7 @@ class StorageManager:
 		Args:
 			date_frame_connection (map): Maps a date string to (layout, spacer).
 		"""
-		from team_planer.widgets.user_input import UserInput
+		from team_planer.ui_elements.user_input import UserInput
 		try:
 			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
