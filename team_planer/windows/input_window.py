@@ -323,4 +323,17 @@ class InputWindow(QWidget):
 
 
 if __name__ == "__main__":
-	pass
+	"""Opens the InputWindow without running the hole application"""
+	import sys
+	from PySide6.QtWidgets import QApplication
+
+	test_app = QApplication(sys.argv)
+
+	test_day = "Monday"
+	test_date = "01.01.2000"
+	test_layout, test_spacer = None, None
+
+	test_input_window = InputWindow(test_day, test_date, test_layout, test_spacer)
+	test_input_window.show()
+
+	sys.exit(test_app.exec())
