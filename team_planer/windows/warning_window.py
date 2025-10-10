@@ -38,4 +38,14 @@ class PopupWindow(QMessageBox):
 
 
 if __name__ == "__main__":
-	pass
+	import sys
+	from PySide6.QtWidgets import QApplication
+
+	app = QApplication(sys.argv)
+
+	text = {999: ["Test Header", "Test Text"]}
+
+	popup = PopupWindow("error", 999, None)
+	popup.exec()
+
+	sys.exit(app.exec())
