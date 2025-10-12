@@ -246,9 +246,8 @@ team_planer/
 │   ├─ storage_manager.py
 │   └─ date_manager.py
 │
-├─ widgets/                      # Custom reusable PySide6 widgets
-│   ├─ clickable_frame.py
-│   ├─ clickable_label.py
+├─ ui_elements/                  # Custom reusable PySide6 UI elements
+│   ├─ clickable_widgets.py      # Combined clickable frame and label
 │   ├─ custom_line_edit.py
 │   └─ ...
 │
@@ -256,10 +255,10 @@ team_planer/
 │   ├─ main_window.py
 │   ├─ input_window.py
 │   ├─ edit_window.py
-│   ├─ error_window.py
+│   ├─ warning_window.py         # Formerly error_window.py
 │   └─ ...
 │
-├─ tests/                        # ✅ New test suite
+├─ tests/                        # ✅ Test suite
 │   ├─ test_date_manager.py      # Unit tests for DateManager (all formats + errors)
 │   ├─ test_storage_manager.py   # Unit tests for SQLite storage (CRUD + integration)
 │   └─ test_config_manager.py    # Unit tests for config loading & saving
@@ -271,5 +270,6 @@ team_planer/
 
 🤝 Contributing
 ---
+
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you’d like to add or change.
