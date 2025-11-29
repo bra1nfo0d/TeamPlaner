@@ -36,15 +36,40 @@ class UserInput:
 		self.calc = 0
 		self.goal = "_"
 		
+		self._load_config()
 		self._setup_frame()
 		self._setup_input_content()
 		self._setup_style()
 	
+	def _load_config(self) -> None:
+		config = self.config_manager.load_config()
+
+		self.font_size = config["user-input_font-size"]
+		self.font_family = config["user-input_font-family"]
+		self.font_weight = config["user-input_font-weight"]
+
+		self.inner_border_width = config["user-input_inner-border-width"]
+		self.inner_border_radius = config["user-input_inner-border-radius"]
+		self.inner_border_color = config["user-input_inner-border-color"]
+
+		self.outer_border_width = config["user-input_outer-border-width"]
+		self.outer_border_radius = config["user-input_outer-border-radius"]
+		self.outer_border_color = config["user-input_outer-border-color"]
+
+		self.calc_true_color = config["user-input_calc-true-color"]
+		self.calc_false_color = config["user-input_calc-false-color"]
+		
+
 	def _setup_frame(self) -> None:
 		"""Create clickable frame and connect click signal."""
 		self.frame = ClickableFrame()
 		self.frame_layout = QVBoxLayout(self.frame)
 		self.frame.clicked.connect(lambda: self._click())
+		self.frame.setStyleSheet(f"""
+			border: {self.outer_border_width}px solid;
+			border-radius: {self.outer_border_radius}px;
+			border-color: {self.outer_border_color};
+		""")
 
 	def _setup_input_content(self) -> None:
 		"""Add labels for text or numeric input data."""
@@ -81,30 +106,40 @@ class UserInput:
 						label.setText(cur_text + "\n" + add_text)
 						self.calc += num
 
+				label.setStyleSheet(f"""
+					font-size: {self.font_size}px;
+					border: {self.inner_border_width}px solid;
+					border-radius: {self.inner_border_radius}px;
+					border-color: {self.inner_border_color};
+				""")
 				label.setAlignment(Qt.AlignCenter)
 		
 	def _setup_style(self) -> None:
 		"""Apply color styling based on settings and calc results."""
 		if isinstance(self.goal, int):
-			config = self.config_manager.load_config()
 			if self.calc >= self.goal:
-				outer_color = config["calc_true_color"]
+				outer_color = self.calc_true_color
 			elif self.calc < self.goal:
-				outer_color = config["calc_false_color"]
+				outer_color = self.calc_false_color
 		elif isinstance(self.goal, str):
 			outer_color = self.setting[3]
 
 		self.frame.setStyleSheet(f"""
-						   border: 2px solid;
-						   border-color: {outer_color};
+			border: {self.outer_border_width}px solid;
+			border-color: {outer_color};
+			border-radius: {self.outer_border_radius}px;
 		""")
 
 		inner_color = self.setting[2]
 		for label in self.label_memory:
 			label.setStyleSheet(f"""
-					   border: 2px solid;
-					   border-color: {inner_color};
-		""")
+				font-size: {self.font_size}px;
+				font-family: {self.font_family};
+				font-weight: {self.font_weight};
+				border: {self.inner_border_width}px solid;
+				border-color: {inner_color};
+				border-radius: {self.inner_border_radius}px;
+			""")
 
 	def _show_input(self) -> None:
 		"""Insert the frame into the layout, keeping spacer order."""
