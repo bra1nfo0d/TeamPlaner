@@ -86,7 +86,7 @@ class StorageManager:
 			connection = sqlite3.connect(DB_FILE)
 			cursor = connection.cursor()
 			cursor.execute("""
-				  INSERT OR REPLACE INTO user_inputs (date, type, settings, text)
+				  INSERT INTO user_inputs (date, type, settings, text)
 				  VALUES (?, ?, ?, ?)
 			""", (
 				date,
