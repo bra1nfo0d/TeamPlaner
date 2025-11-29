@@ -22,3 +22,6 @@ class AdditionalWindow(MainWindow):
 		
 		if self.main_window not in self.window_memory:
 			self.window_memory.append(self.main_window)
+
+if __name__ == "__main__":
+	pass

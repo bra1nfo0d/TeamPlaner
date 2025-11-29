@@ -144,17 +144,4 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-	"""Opens the MainWindow without running the hole application"""
-	import sys
-	from PySide6.QtWidgets import QApplication
-
-	test_app = QApplication(sys.argv)
-
-	test_weeks_shown = 2
-	test_is_main_window = True
-	test_start_week = 0
-
-	test_main_window = MainWindow(test_weeks_shown, test_is_main_window, test_start_week)
-	test_main_window.show()
-
-	sys.exit(test_app.exec())
+	pass

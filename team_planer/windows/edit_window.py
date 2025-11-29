@@ -7,7 +7,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QShortcut, QKeySequence
 from team_planer.ui_elements.custom_input_bind import CustomLineEdit
+from team_planer.ui_elements.clickable_widgets import OutputLable
 from team_planer.core.storage_manager import StorageManager
+from team_planer.core.config_manager import ConfigManager
 from team_planer.windows.warning_window import PopupWindow
 
 class EditWindow(QWidget):
@@ -35,6 +37,7 @@ class EditWindow(QWidget):
 		"""
 		super().__init__()
 		self.storage_manager = StorageManager(self)
+		self.config_manager = ConfigManager()
 
 		self.user_input = user_input
 		self.date = date
@@ -44,12 +47,15 @@ class EditWindow(QWidget):
 		self.layout = layout
 		self.spacer = spacer
 		self.padding = padding
-		self.text_focus = 0
-		self.frame_focus = 0
+
+		self.display_focus = 0
 		self.edit_focus = 0
-		self.label_memory = []
+		self.frame_focus = 0
+
+		self.dispay_label_memory = []
 		self.edit_label_memory = []
 
+		self._load_configs()
 		self._setup_window()
 		self._setup_layout()
 		self._setup_display_frame()
@@ -61,6 +67,26 @@ class EditWindow(QWidget):
 		self._setup_shortcuts()
 		self._setup_display_content()
 		self._setup_edit_content()
+		self._setup_style_sheet(obj=self.dispay_label_memory[0], focused=True)
+	
+	def _load_configs(self):
+		config = self.config_manager.load_config()
+
+		self.font_size = config["edit-window_font-size"]
+		self.font_family = config["edit-window_font-family"]
+		self.font_weight = config["edit-window_font-weight"]
+
+		self.inner_border_width = config["edit-window_inner-border-width"]
+		self.inner_border_radius = config["edit-window_inner-border-radius"]
+		self.inner_border_color = config["edit-window_inner-border-color"]
+
+		self.outer_border_width = config["edit-window_outer-border-width"]
+		self.outer_border_radius = config["edit-window_outer-border-radius"]
+		self.outer_border_color = config["edit-window_outer-border-color"]
+
+		self.focus_color = config["edit-window_focused-content-color"]
+
+		self.content_margin = config["edit-window_content-margin"]
 
 	def _setup_window(self) -> None:
 		"""Configure size, title, and always-on-top behavior."""
@@ -91,11 +117,7 @@ class EditWindow(QWidget):
 		"""Create frame showing current input content."""
 		self.display_frame = QFrame()
 		self.display_frame.setLayout(self.display_frame_layout)
-		self.display_frame.setStyleSheet("""
-								   border: 2px solid;
-								   border-radius: 10px;
-								   border-color: yellow;
-		""")
+		self._setup_style_sheet(obj=self.display_frame, inner=False)
 		self.display_frame.setFrameShape(QFrame.Box)
 		self.row1_layout.addWidget(self.display_frame)
 
@@ -103,11 +125,7 @@ class EditWindow(QWidget):
 		"""Create frame showing editable labels."""
 		self.edit_frame = QFrame()
 		self.edit_frame.setLayout(self.edit_frame_layout)
-		self.edit_frame.setStyleSheet("""
-								border: 2px solid;
-								border-radius: 10px;
-								border-color: #ccc;
-								""")
+		self._setup_style_sheet(obj=self.edit_frame, inner=False)
 		self.edit_frame.setFrameShape(QFrame.Box)
 		self.row2_layout.addWidget(self.edit_frame)
 	
@@ -141,22 +159,39 @@ class EditWindow(QWidget):
 	def _setup_shortcuts(self) -> None:
 		"""Register navigation and edit shortcuts."""
 		down_shortcut = QShortcut(Qt.Key_Down, self)
-		down_shortcut.activated.connect(lambda: self._change_text_focus(1))
+		down_shortcut.activated.connect(lambda: self._change_label_focus(val=1))
 		up_shortcut = QShortcut(Qt.Key_Up, self)
-		up_shortcut.activated.connect(lambda: self._change_text_focus(-1))
+		up_shortcut.activated.connect(lambda: self._change_label_focus(val=-1))
 
 		shift_up_shortcut = QShortcut(QKeySequence(Qt.SHIFT | Qt.Key_Up), self)
-		shift_up_shortcut.activated.connect(self._switch_frame_focus)
-
+		shift_up_shortcut.activated.connect(self._change_frame_focus)
 		shift_down_shortcut = QShortcut(QKeySequence(Qt.SHIFT | Qt.Key_Down), self)
-		shift_down_shortcut.activated.connect(self._switch_frame_focus)
+		shift_down_shortcut.activated.connect(self._change_frame_focus)
 
 		shift_return_shortcut = QShortcut(QKeySequence(Qt.SHIFT | Qt.Key_Return), self)
 		shift_return_shortcut.activated.connect(self._add_text_label)
 
+	def _setup_style_sheet(self, obj: object, focused: bool = False, inner: bool = True) -> None:
+		if inner:
+			if focused:
+				color = self.focus_color
+			else:
+				color = self.inner_border_color
+			obj.setStyleSheet(f"""
+				border: {self.inner_border_width}px solid;
+				border-radius: {self.inner_border_radius}px;
+				border-color: {color};
+			""")
+		else:
+			obj.setStyleSheet(f"""
+				border: {self.outer_border_width}px solid;
+				border-radius: {self.outer_border_radius}px;
+				border-color: {self.outer_border_color};
+			""")
+
 	def _delete_user_input(self) -> None:
 		"""Delete input from storage and remove from UI."""
-		result = self._show_warning("accept", "E001")
+		result = self._show_warning("warning", 0)
 		if result:
 			self.storage_manager.delete_user_input(self.date, self.text_memory)
 			if self.user_input.layout:
@@ -173,7 +208,7 @@ class EditWindow(QWidget):
 				for k in range(2, len(self.text_memory[i])):
 					pattern = r".*#\d+(?:[,.]\d{2})?$"
 					if not re.match(pattern, self.text_memory[i][k]):
-						self._show_warning(text_code="E001")
+						self._show_warning(popup_type="error", text_code=1)
 						return
 		self.storage_manager.delete_user_input(self.date, self.past_text_memory)
 		if self.user_input.layout:
@@ -195,8 +230,9 @@ class EditWindow(QWidget):
 	def _setup_display_content(self) -> None:
 		"""Fill display frame with formatted labels."""
 		for i in range(len(self.text_memory)):
-			label = QLabel()
-			self.label_memory.append(label)
+			label = OutputLable(output=(0, i))
+			label.outputEmitted.connect(self._on_label_pressed)
+			self.dispay_label_memory.append(label)
 			self.display_frame_layout.addWidget(label)			
 			if re.match(r"calc", self.text_memory[i][0]):
 				text = self.text_memory[i][1][1:]
@@ -218,156 +254,137 @@ class EditWindow(QWidget):
 				if text.startswith("*"):
 					text = text[1:]
 				label.setText(text)
-			if i == self.text_focus:
-				color = "yellow"
-			else:
-				color = "#ccc"				
-			label.setStyleSheet(f"""
-					   border: 2px solid;
-					   border-radius: 10px;
-					   border-color: {color};
-					   """)
+			self._setup_style_sheet(obj=label)
 			label.setAlignment(Qt.AlignCenter)
-			label.setContentsMargins(5, 2, 5, 2)
+			left = self.content_margin[0]
+			top = self.content_margin[1]
+			right = self.content_margin[2]
+			bottom = self.content_margin[3]
+			label.setContentsMargins(left, top, right, bottom)
+
+			
 	
 	def _delete_cur_input_view(self) -> None:
 		"""Rebuild display labels."""
-		for label in self.label_memory:
+		for label in self.dispay_label_memory:
 			label.deleteLater()
-		self.label_memory = []
+		self.dispay_label_memory = []
 		self._setup_display_content()
 	
 	def _setup_edit_content(self) -> None:
 		"""Fill edit frame with editable labels."""
-		for i in range(1, len(self.text_memory[self.text_focus])):
-			label = QLabel()
-			text = self.text_memory[self.text_focus][i]
+		for i in range(1, len(self.text_memory[self.display_focus])):
+			label = OutputLable(output=(1, i-1))
+			label.outputEmitted.connect(self._on_label_pressed)
+			text = self.text_memory[self.display_focus][i]
 			if text.startswith("*"):
 				text = text[1:]
 			label.setText(text)
 			self.edit_label_memory.append(label)
 			self.edit_frame_layout.addWidget(label)
-			if i == self.edit_focus+1:
-				color = "yellow"
-			else:
-				color = "#ccc"
-			label.setStyleSheet(f"""
-					   border: 2px solid;
-					   border-radius: 10px;
-					   border-color: {color};
-					   """)
+			self._setup_style_sheet(obj=label)
 			label.setAlignment(Qt.AlignCenter)
-			label.setContentsMargins(5, 2, 5, 2)
+			left = self.content_margin[0]
+			top = self.content_margin[1]
+			right = self.content_margin[2]
+			bottom = self.content_margin[3]
+			label.setContentsMargins(left, top, right, bottom)
 
 	def _delete_cur_edit_view(self) -> None:
 		"""Rebuild editable labels."""
-		self.storage_manager.delete_user_input(self.date, self.past_text_memory)
 		for label in self.edit_label_memory:
 			label.deleteLater()		
 		self.edit_label_memory = []
 		self._setup_edit_content()
 
-	def _change_text_focus(self, val: int) -> None:
-		"""Move text or label selection focus."""
+	def _on_label_pressed(self, value: tuple):
+		print(value)
 		if self.frame_focus == 0:
-			cur_label = self.label_memory[self.text_focus]
-			cur_label.setStyleSheet("""
-						   border: 2px solid;
-						   border-radius: 10px;
-						   border-color: #ccc;
-						   """)
-			self.text_focus = (self.text_focus+val) % len(self.text_memory)
-			new_label = self.label_memory[self.text_focus]
-			new_label.setStyleSheet("""
-						   border: 2px solid;
-						   border-radius: 10px;
-						   border-color: yellow;
-						   """)
-			self._delete_cur_edit_view()
-			self.edit_focus = 0
+			old_label = self.dispay_label_memory[self.display_focus]
 		else:
-			cur_label = self.edit_label_memory[self.edit_focus]
-			cur_label.setStyleSheet("""
-						   border: 2px solid;
-						   border-radius: 10px;
-						   border-color: #ccc;
-						   """)
-			self.edit_focus = (self.edit_focus+val) % len(self.edit_label_memory)
-			new_label = self.edit_label_memory[self.edit_focus]
-			new_label.setStyleSheet("""
-						   border: 2px solid;
-						   border-radius: 10px;
-						   border-color: yellow;
-						   """)
-			new_text = self.text_memory[self.text_focus][self.edit_focus+1]
-			if new_text.startswith("*"):
-				self.text_input.setReadOnly(True)
-				self.text_input.setText("")
-			else:
-				self.text_input.setReadOnly(False)
-				self.text_input.setText(self.text_memory[self.text_focus][self.edit_focus+1])
-
-	def _switch_frame_focus(self) -> None:
-		"""Toggle focus between display and edit frame."""
-		self.frame_focus = (self.frame_focus+1)%2
-		if self.frame_focus == 0:
-			self.display_frame.setStyleSheet("""
-									border: 2px solid;
-									border-radius: 10px;
-									border-color: yellow;
-									""")
-			self.edit_frame.setStyleSheet("""
-								 border: 2px solid;
-								 border-radius: 10px;
-								 border-color: #ccc;
-								 """)
+			old_label = self.edit_label_memory[self.edit_focus]
+		if value[0] == 0:
+			self.frame_focus = 0
+			self.edit_focus = 0
+			self.display_focus = value[1]
+			new_label = self.dispay_label_memory[value[1]]
+			self._delete_cur_edit_view()
+			self.text_input.setReadOnly(True)
 			self.text_input.setText("")
 		else:
-			self.display_frame.setStyleSheet("""
-									border: 2px solid;
-									border-radius: 10px;
-									border-color: #ccc;
-									""")
-			self.edit_frame.setStyleSheet("""
-								 border: 2px solid;
-								 border-radius: 10px;
-								 border-color: yellow;
-								 """)
-			focus_label = self.edit_label_memory[0]
-			focus_label.setStyleSheet("""
-							 border: 2px solid;
-							 border-radius: 10px;
-							 border-color: yellow;
-							 """)
-			focus_text = self.text_memory[self.text_focus][1]
-			if focus_text.startswith("*"):
+			self.frame_focus = 1
+			self.edit_focus = value[1]
+			new_label = self.edit_label_memory[value[1]]
+			text = self.text_memory[self.display_focus][self.edit_focus+1]
+			if text.startswith("*"):
 				self.text_input.setReadOnly(True)
 				self.text_input.setText("")
 			else:
 				self.text_input.setReadOnly(False)
-				self.text_input.setText(self.text_memory[self.text_focus][self.edit_focus+1])
+				self.text_input.setText(text)
+		self._setup_style_sheet(obj=old_label)
+		self._setup_style_sheet(obj=new_label, focused=True)
+
+
+	def _change_label_focus(self, val: int) -> None:
+		if self.frame_focus == 0:
+			old_label = self.dispay_label_memory[self.display_focus]
+			self.display_focus = (self.display_focus+val) % len(self.dispay_label_memory)
+			new_label = self.dispay_label_memory[self.display_focus]
+			self._delete_cur_edit_view()
+			self.text_input.setReadOnly(True)
+			self.text_input.setText("")
+		elif self.frame_focus == 1:
+			old_label = self.edit_label_memory[self.edit_focus]
+			self.edit_focus = (self.edit_focus+val) % len(self.edit_label_memory)
+			new_label = self.edit_label_memory[self.edit_focus]
+			text = self.text_memory[self.display_focus][self.edit_focus+1]
+			if text.startswith("*"):
+				self.text_input.setReadOnly(True)
+				self.text_input.setText("")
+			else:
+				self.text_input.setReadOnly(False)
+				self.text_input.setText(text)
+
+		self._setup_style_sheet(obj=old_label)
+		self._setup_style_sheet(obj=new_label, focused=True)
+			
+
+	def _change_frame_focus(self) -> None:
+		if self.frame_focus == 0:
+			self.frame_focus = 1
+			old_label = self.dispay_label_memory[self.display_focus]
+			new_label = self.edit_label_memory[0]
+			self.edit_focus = 0
+			self._setup_style_sheet(obj=old_label)
+			self._setup_style_sheet(obj=new_label, focused=True)
+		elif self.frame_focus == 1:
+			self.frame_focus = 0
+			old_label = self.edit_label_memory[self.edit_focus]
+			new_label = self.dispay_label_memory[self.display_focus]
+			self._setup_style_sheet(obj=old_label)
+			self._setup_style_sheet(obj=new_label, focused=True)
+			self.text_input.setReadOnly(True)
+			self.text_input.setText("")
+		
 	
 	def _on_delete(self) -> None:
 		"""Delete current editable label (except headers)."""
 		if self.frame_focus == 1 and len(self.edit_label_memory) > 1:
 			label = self.edit_label_memory[self.edit_focus]
-			del_text = self.text_memory[self.text_focus][self.edit_focus+1]
+			del_text = self.text_memory[self.display_focus][self.edit_focus+1]
 			if del_text.startswith("*"):
 				return
 			self.edit_label_memory.remove(label)
-			self.text_memory[self.text_focus].remove(del_text)
+			self.text_memory[self.display_focus].remove(del_text)
 			label.deleteLater()
 
 			if self.edit_focus+1 > len(self.edit_label_memory):
 				self.edit_focus -= 1
 
-			new_focus_label = self.edit_label_memory[self.edit_focus]
-			new_focus_label.setStyleSheet("""
-								 border: 2px solid;
-								 border-radius: 10px;
-								 border-color: yellow;
-								 """)
-			text = self.text_memory[self.text_focus][self.edit_focus+1]
+			new_label = self.edit_label_memory[self.edit_focus]
+			self._setup_style_sheet(obj=new_label, focused=True)
+			text = self.text_memory[self.display_focus][self.edit_focus+1]
 			if text.startswith("*"):
 				self.text_input.setReadOnly(True)
 				self.text_input.setText("")
@@ -378,29 +395,34 @@ class EditWindow(QWidget):
 
 	def _on_return(self) -> None:
 		"""Update focused label text form input."""
-		if self.frame_focus == 1 and not self.text_memory[self.text_focus][self.edit_focus+1].startswith("*"):
+		if self.frame_focus == 1 and not self.text_memory[self.display_focus][self.edit_focus+1].startswith("*"):
 			label = self.edit_label_memory[self.edit_focus]
 			text = self.text_input.text()
 			if text.startswith("*"):
-				self._show_warning(text_code="E002")
+				self._show_warning(popup_type="error", text_code=0)
 				return
-			if re.match(r"calc", self.text_memory[self.text_focus][0]) and not re.match(r".*#\d+(?:[,.]\d{2})?$", text):
-				self._show_warning(text_code="E001")
+			if not re.match(r"\S", text):
+				self._show_warning(popup_type="error", text_code=2)
+				return
+			if re.match(r"calc", self.text_memory[self.display_focus][0]) and not re.match(r".*#\d+(?:[,.]\d{2})?$", text):
+				self._show_warning(popup_type="error", text_code=1)
 				return
 			label.setText(text)
-			self.text_memory[self.text_focus][self.edit_focus+1] = text
+			self.text_memory[self.display_focus][self.edit_focus+1] = text
 			self._delete_cur_input_view()
 
 	def _add_text_label(self) -> None:
 		"""Add new text label below current edit label."""
 		if self.frame_focus == 1:
-			self.text_memory[self.text_focus].insert(self.edit_focus+2, "")
-			self.edit_focus = self.edit_focus+1
+			self.text_memory[self.display_focus].insert(self.edit_focus+2, "")
+			self.edit_focus += 1
 			self._delete_cur_edit_view()
+			new_label = self.edit_label_memory[self.edit_focus]
+			self._setup_style_sheet(obj=new_label, focused=True)
 			self.text_input.setReadOnly(False)
 			self.text_input.setText("")
 
-	def _show_warning(self, popup_type: str, text_code: str) -> bool:
+	def _show_warning(self, popup_type: str, text_code: int) -> bool | None:
 		"""
 		Show popup window.
 
@@ -414,6 +436,7 @@ class EditWindow(QWidget):
 
 	def closeEvent(self, event) -> None:
 		"""Clean up on close."""
+		self.text_memory = self.past_text_memory
 		del self
 		event.accept()
 

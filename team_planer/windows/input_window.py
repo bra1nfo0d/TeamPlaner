@@ -8,17 +8,20 @@ from PySide6.QtGui import QShortcut
 from team_planer.windows.warning_window import PopupWindow
 from team_planer.ui_elements.custom_input_bind import CustomLineEdit
 from team_planer.ui_elements.user_input import UserInput
+from team_planer.ui_elements.clickable_widgets import OutputLable
 from team_planer.core.storage_manager import StorageManager
 from team_planer.core.config_manager import ConfigManager
 
 class InputWindow(QWidget):
 	"""Popup for entering and managing user input from specific day."""
 
-	def __init__(self,
-			  day: str,
-			  date: str,
-			  target_layout: object,
-			  target_spacer: object):
+	def __init__(
+			self,
+			day: str,
+			date: str,
+			target_layout: object,
+			target_spacer: object,
+			):
 		"""
 		Args:
 			day (str): Weekday name.
@@ -39,6 +42,7 @@ class InputWindow(QWidget):
 		self.label_pointer = [0, 0] #TODO: change to tuple
 		self.calc = 0.0
 
+		self._load_configs()
 		self._setup_window()
 		self._setup_layouts()
 		self._setup_frame()
@@ -48,6 +52,46 @@ class InputWindow(QWidget):
 		self._setup_spacer()
 		self._setup_shortcuts()
 		self._setup_input_view([""])
+	
+	def _load_configs(self):
+		config = self.config_manager.load_config()
+
+		self.input_types = config["input-window_input-types"]
+		self.first_input_type = config["input-window_first-input-type"]
+
+		self.font_size = config["input-window_font-size"]
+		self.font_family = config["input-window_font-family"]
+		self.font_weight = config["input-window_font-weight"]
+
+		self.inner_border_width = config["input-window_inner-border-width"]
+		self.inner_border_radius = config["input-window_inner-border-radius"]
+		self.inner_border_color = config["input-window_inner-border-color"]
+
+		self.outer_border_width = config["input-window_outer-border-width"]
+		self.outer_border_radius = config["input-window_outer-border-radius"]
+		self.outer_border_color = config["input-window_outer-border-color"]
+
+		self.focus_color = config["input-window_focus-content-color"]
+
+		self.content_margin = config["input-window_content-margin"]
+
+	def _setup_style_sheet(self, obj: object, focused: bool = False, inner: bool = True):
+		if inner:
+			if focused:
+				color = self.focus_color
+			else:
+				color = self.inner_border_color
+			obj.setStyleSheet(f"""
+				border: {self.inner_border_width}px solid;
+				border-radius: {self.inner_border_radius}px;
+				border-color: {color};
+			""")
+		else:
+			obj.setStyleSheet(f"""
+				border: {self.outer_border_width}px solid;
+				border-radius: {self.outer_border_radius}px;
+				border-color: {self.outer_border_color};
+			""")
 
 	def _setup_window(self) -> None:
 		"""Configure size, title, and always-on-top behavior."""
@@ -68,12 +112,13 @@ class InputWindow(QWidget):
 		self.frame.setLayout(self.frame_layout)
 		self.frame.setFrameShape(QFrame.Box)
 		self.frame.setLineWidth(2)
-		self.frame.setStyleSheet("""
-						   padding: 4px;
-						   border: 2px solid;
-						   border-radius: 10px;
-						   border-color: #ccc;
-		""")
+		self._setup_style_sheet(obj=self.frame, inner=False)
+#		self.frame.setStyleSheet("""
+#						   padding: 4px;
+#						   border: 2px solid;
+#						   border-radius: 10px;
+#						   border-color: #ccc;
+#		""")
 		self.row1.addWidget(self.frame)
 
 	def _setup_submit_button(self) -> None:
@@ -86,7 +131,7 @@ class InputWindow(QWidget):
 		"""Add main text input with Enter/Delete signals."""
 		self.text_input = CustomLineEdit()
 		self.text_input.setStyleSheet("""
-								background-color: #121212;
+			background-color: #121212;
 		""")
 		self.text_input.returnPressed.connect(self._on_return)
 		self.text_input.deletePressed.connect(self._on_delete)
@@ -95,10 +140,10 @@ class InputWindow(QWidget):
 	def _setup_drop_bar(self) -> None:
 		"""Add dropdown for selecting input types."""
 		self.drop_bar = QComboBox()
-		self.drop_bar.addItems(self.config_manager.load_config()["input_types"])
+		self.drop_bar.addItems(self.input_types)
 		self.drop_bar.setStyleSheet("""
-							  background-color: #121212;
-							  """)
+			background-color: #121212;
+		""")
 		self.drop_bar.currentTextChanged.connect(self._setup_input_view)
 		self.row2.addWidget(self.drop_bar)
 
@@ -128,10 +173,12 @@ class InputWindow(QWidget):
 			input_type (list[str]): Selected input type, defaults to first config type.
 		"""
 		if input_type == [""]:
-			config = self.config_manager.load_config()
-			input_type = config["first_input_type"]
+			input_type = self.first_input_type
+#			config = self.config_manager.load_config()
+#			input_type = config["first_input_type"]
 
-		self.cur_input_struct = self.config_manager.load_config()["input_types"][input_type]
+		self.cur_input_struct = self.input_types[input_type]
+#		self.cur_input_struct = self.config_manager.load_config()["input_types"][input_type]
 		self._clear_content()
 		label_count = len(self.cur_input_struct) - 1
 		self.label_pointer = [0, label_count]
@@ -140,21 +187,32 @@ class InputWindow(QWidget):
 			self.text_memory.append([self.cur_input_struct[i+1][1]])
 			cur_header = self.cur_input_struct[i+1][0]
 			if cur_header == "_":
-				label = QLabel()
+				label = OutputLable(output=i)
+				label.outputEmitted.connect(self._on_label_pressed)
 			else:
-				label = QLabel(cur_header)
+				label = OutputLable(text=cur_header, output=i)
+				label.outputEmitted.connect(self._on_label_pressed)
 				self.text_memory[i].append(f"*{cur_header}")
 			label.setAlignment(Qt.AlignCenter)
-			label.setContentsMargins(5, 2, 5, 2)
+			left = self.content_margin[0]
+			top = self.content_margin[1]
+			right = self.content_margin[2]
+			bottom = self.content_margin[3]
+			label.setContentsMargins(left, top, right, bottom)
 			if i == 0:
-				color = "yellow"
+				self._setup_style_sheet(obj=label, focused=True)
 			else:
-				color = "#ccc"
-			label.setStyleSheet(f"""
-					   border: 2px solid;
-					   border-radius: 10px;
-					   border-color: {color};
-					   """)				
+				self._setup_style_sheet(obj=label)
+
+#			if i == 0:
+#				color = "yellow"
+#			else:
+#				color = "#ccc"
+#			label.setStyleSheet(f"""
+#					   border: 2px solid;
+#					   border-radius: 10px;
+#					   border-color: {color};
+#					   """)				
 			self.frame_layout.addWidget(label)
 			self.label_memory.append(label)
 
@@ -166,7 +224,10 @@ class InputWindow(QWidget):
 		label = self.label_memory[self.label_pointer[0]]
 		cur_text = label.text()
 		if entry_text.startswith("*"):
-			self._show_warning(error_code="E002")
+			self._show_warning(popup_type="error", error_code=0)
+			return
+		if not re.match(r"\S", entry_text):
+			self._show_warning(popup_type="error", error_code=2)
 			return
 		if re.match(r"text", entry_type):
 			if len(self.text_memory[self.label_pointer[0]]) > 1:
@@ -204,7 +265,7 @@ class InputWindow(QWidget):
 					label.setText(text + " -> " + num)
 				self.text_memory[self.label_pointer[0]].append(text + "#" + calc_str)
 			else:
-				self._show_warning(error_code="E001")
+				self._show_warning(popup_type="error", error_code=3)
 				return
 		self.text_input.clear()
 
@@ -228,7 +289,7 @@ class InputWindow(QWidget):
 		"""Validate input and save as UserInput."""
 		for l in self.text_memory:
 			if len(l) <= 1:
-				self._show_warning(error_code="E003")
+				self._show_warning(popup_type="error", error_code=4)
 				return
 		settings = self.cur_input_struct[0]
 		user_input = UserInput(
@@ -271,16 +332,39 @@ class InputWindow(QWidget):
 				else:
 					self.label_memory[i].setText("")
 			self.label_pointer = [0, len(cur_headers)]
-			top_label.setStyleSheet("""
-						   QLabel {
-						   border: 2px solid;
-						   border-color: yellow;
-						   }""")
-			cur_label.setStyleSheet("""
-						   QLabel {
-						   border: 2px solid;
-						   border-color: #ccc;
-						   }""")
+			self._setup_style_sheet(obj=top_label, focused=True)
+			self._setup_style_sheet(obj=cur_label)
+
+#			top_label.setStyleSheet("""
+#						   QLabel {
+#						   border: 2px solid;
+#						   border-color: yellow;
+#						   }""")
+#			cur_label.setStyleSheet("""
+#						   QLabel {
+#						   border: 2px solid;
+#						   border-color: #ccc;
+#						   }""")
+			
+	def _on_label_pressed(self, value: int):
+		if value != self.label_pointer[0]:
+			past_label = self.label_memory[self.label_pointer[0]]
+			self._setup_style_sheet(obj=past_label)
+
+#			past_label.setStyleSheet("""
+#				QLabel {
+#				border: 2px solid;
+#				border-color: #ccc;
+#			}""")
+			self.label_pointer[0] = value
+			cur_label = self.label_memory[value]
+			self._setup_style_sheet(obj=cur_label, focused=True)
+
+#			cur_label.setStyleSheet("""
+#				QLabel {
+#				border: 2px solid;
+#				border-color: yellow;
+#			}""")
 	
 	def _on_arrow_press(self, val: int) -> None:
 		"""Move focus between labels."""
@@ -288,20 +372,23 @@ class InputWindow(QWidget):
 		pointer = self.label_pointer[0]
 		calc = (pointer+val)%lenght
 		past_label = self.label_memory[self.label_pointer[0]]
-		past_label.setStyleSheet("""
-						   QLabel {
-						   border: 2px solid;
-						   border-color: #ccc;
-						   }""")
+		self._setup_style_sheet(obj=past_label)
+
+#		past_label.setStyleSheet("""
+#			QLabel {
+#			border: 2px solid;
+#			border-color: #ccc;
+#		}""")
 		lenght = self.label_pointer[1]
 		pointer = self.label_pointer[0]
 		self.label_pointer = [calc, lenght]
 		cur_label = self.label_memory[self.label_pointer[0]]
-		cur_label.setStyleSheet("""
-						  QLabel {
-						  border: 2px solid;
-						  border-color: yellow;
-						  }""")
+		self._setup_style_sheet(obj=cur_label, focused=True)
+#		cur_label.setStyleSheet("""
+#						  QLabel {
+#						  border: 2px solid;
+#						  border-color: yellow;
+#						  }""")
 	
 	def _clear_content(self) -> None:
 		"""Remove all labels and reset memory."""
@@ -311,29 +398,16 @@ class InputWindow(QWidget):
 		self.label_memory = []
 		self.text_memory = []
 	
-	def _show_warning(self, error_code: str) -> None:
+	def _show_warning(self, popup_type: str, error_code: str) -> None:
 		"""
 		Show an error popup.
 
 		Args:
 			error_code (str): Error code identifier.
 		"""
-		error_window = PopupWindow("error", error_code, self)
+		error_window = PopupWindow(popup_type, error_code, self)
 		error_window.exec()
 
 
 if __name__ == "__main__":
-	"""Opens the InputWindow without running the hole application"""
-	import sys
-	from PySide6.QtWidgets import QApplication
-
-	test_app = QApplication(sys.argv)
-
-	test_day = "Monday"
-	test_date = "01.01.2000"
-	test_layout, test_spacer = None, None
-
-	test_input_window = InputWindow(test_day, test_date, test_layout, test_spacer)
-	test_input_window.show()
-
-	sys.exit(test_app.exec())
+	pass
