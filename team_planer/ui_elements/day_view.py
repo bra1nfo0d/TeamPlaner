@@ -1,8 +1,10 @@
+import time
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QFrame, QSpacerItem, QSizePolicy
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from team_planer.core.date_manager import DateManager
 from team_planer.core.config_manager import ConfigManager
+from team_planer.core.time_manager import TimeManager
 from team_planer.ui_elements.clickable_widgets import ClickableLabel
 from team_planer.windows.input_window import InputWindow
 from team_planer.windows.warning_window import PopupWindow
@@ -19,17 +21,25 @@ class DayView(QWidget):
 		super().__init__()
 		self.config_manager = ConfigManager()
 		self.date_manager = DateManager()
+		self.time_manager = TimeManager()
 
 		self.day = day
 		self.date = date
 		self.tday = self.date_manager.get_date_str()
 
+		self._setup_logic()
 		self._load_config()
 		self._setup_frame()
 		self._setup_layout()
 		self._setup_header()
 
+
+	def _setup_logic(self) -> None:
+		self.time_manager.signal.connect(self._setup_frame)
+
+
 	def _load_config(self) -> None:
+		"""Loads the config values"""
 		config = self.config_manager.load_config()
 
 		self.font_size = config["display-window_font-size"]
@@ -51,6 +61,7 @@ class DayView(QWidget):
 		self.frame_to_content_margin = config["display-window_frame-content_margin"]
 		self.content_to_content_margin = config["display-window_content-content_margin"]
 
+
 	def _setup_layout(self) -> None:
 		"""Configure main and padding"""
 		left = self.frame_to_content_margin[0]
@@ -68,11 +79,11 @@ class DayView(QWidget):
 		self.padding_layout = QVBoxLayout()
 		self.padding_layout.setContentsMargins(0, 0, 0, self.header_to_content_margin)
 
+
 	def _setup_frame(self) -> None:
 		"""Create and style main frame; highlight if today."""
 		self.frame = QFrame(self)
 		self.frame.setFrameShape(QFrame.Box)
-#		self.frame.setLineWidth(2)
 
 		if self.tday == self.date:
 			color = self.tday_content_frame_border_color
@@ -84,6 +95,7 @@ class DayView(QWidget):
 						   border-radius: {self.content_frame_border_radius}px;
 						   border-color: {color};
 		""")
+
 
 	def _setup_header(self) -> None:
 		"""Create clickable header with weekday and date."""
@@ -122,7 +134,8 @@ class DayView(QWidget):
 		self.frame_layout.addWidget(label)
 		self.frame_layout.addItem(self.spacer)
 		self.frame_layout.addLayout(self.padding_layout)
-	
+
+
 	def _label_clicked(self) -> None:
 		"""Open input window for this day."""
 		input_window = InputWindow(
@@ -132,7 +145,8 @@ class DayView(QWidget):
 			self.spacer
 		)
 		input_window.show()
-	
+
+
 	def get_elements(self) -> list:
 		"""
 		Returns:

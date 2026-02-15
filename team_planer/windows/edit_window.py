@@ -68,7 +68,8 @@ class EditWindow(QWidget):
 		self._setup_display_content()
 		self._setup_edit_content()
 		self._setup_style_sheet(obj=self.dispay_label_memory[0], focused=True)
-	
+
+
 	def _load_configs(self):
 		config = self.config_manager.load_config()
 
@@ -88,6 +89,7 @@ class EditWindow(QWidget):
 
 		self.content_margin = config["edit-window_content-margin"]
 
+
 	def _setup_window(self) -> None:
 		"""Configure size, title, and always-on-top behavior."""
 		self.resize(400, 400)
@@ -101,6 +103,7 @@ class EditWindow(QWidget):
 			header = "Input Edit"
 		self.setWindowTitle(f"{header} - {self.date}")
 
+
 	def _setup_layout(self) -> None:
 		"""Create main layout with display, edit, and input columns."""
 		self.display_frame_layout = QVBoxLayout()
@@ -112,7 +115,8 @@ class EditWindow(QWidget):
 		main_layout.addLayout(self.row1_layout)
 		main_layout.addLayout(self.row2_layout)
 		main_layout.addLayout(self.input_layout)
-	
+
+
 	def _setup_display_frame(self) -> None:
 		"""Create frame showing current input content."""
 		self.display_frame = QFrame()
@@ -121,6 +125,7 @@ class EditWindow(QWidget):
 		self.display_frame.setFrameShape(QFrame.Box)
 		self.row1_layout.addWidget(self.display_frame)
 
+
 	def _setup_edit_frame(self) -> None:
 		"""Create frame showing editable labels."""
 		self.edit_frame = QFrame()
@@ -128,7 +133,8 @@ class EditWindow(QWidget):
 		self._setup_style_sheet(obj=self.edit_frame, inner=False)
 		self.edit_frame.setFrameShape(QFrame.Box)
 		self.row2_layout.addWidget(self.edit_frame)
-	
+
+
 	def _setup_text_input(self) -> None:
 		"""Create text input field for editing."""
 		self.text_input = CustomLineEdit()
@@ -136,25 +142,29 @@ class EditWindow(QWidget):
 		self.text_input.returnPressed.connect(self._on_return)
 		self.text_input.deletePressed.connect(self._on_delete)
 		self.input_layout.addWidget(self.text_input)
-	
+
+
 	def _setup_change_button(self) -> None:
 		"""Add button to apply changes."""
 		change_button = QPushButton("Change")
 		change_button.clicked.connect(self._change_user_input)
 		self.input_layout.addWidget(change_button)
-	
+
+
 	def _setup_delete_button(self) -> None:
 		"""Add button to delete entry."""
 		delete_button = QPushButton("Delete")
 		delete_button.clicked.connect(self._delete_user_input)
 		self.input_layout.addWidget(delete_button)
-	
+
+
 	def _setup_spacer(self) -> None:
 		"""Add expanding spacer for layout alignment."""
 		spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 		self.row1_layout.addItem(spacer)
 		self.row2_layout.addItem(spacer)
 		self.input_layout.addItem(spacer)
+
 
 	def _setup_shortcuts(self) -> None:
 		"""Register navigation and edit shortcuts."""
@@ -170,6 +180,7 @@ class EditWindow(QWidget):
 
 		shift_return_shortcut = QShortcut(QKeySequence(Qt.SHIFT | Qt.Key_Return), self)
 		shift_return_shortcut.activated.connect(self._add_text_label)
+
 
 	def _setup_style_sheet(self, obj: object, focused: bool = False, inner: bool = True) -> None:
 		if inner:
@@ -189,6 +200,7 @@ class EditWindow(QWidget):
 				border-color: {self.outer_border_color};
 			""")
 
+
 	def _delete_user_input(self) -> None:
 		"""Delete input from storage and remove from UI."""
 		result = self._show_warning("warning", 0)
@@ -199,7 +211,8 @@ class EditWindow(QWidget):
 			self.user_input.frame.setParent(None)
 			self.user_input.frame.deleteLater()
 			self.close()
-	
+
+
 	def _change_user_input(self) -> None:
 		"""Validate and apply edits to user input."""
 		from team_planer.ui_elements.user_input import UserInput
@@ -226,6 +239,7 @@ class EditWindow(QWidget):
 		changed_user_input._show_input()
 		self.storage_manager.store_user_input(self.date, self.text_memory, self.settings)
 		self.close()
+
 
 	def _setup_display_content(self) -> None:
 		"""Fill display frame with formatted labels."""
@@ -263,14 +277,14 @@ class EditWindow(QWidget):
 			label.setContentsMargins(left, top, right, bottom)
 
 			
-	
 	def _delete_cur_input_view(self) -> None:
 		"""Rebuild display labels."""
 		for label in self.dispay_label_memory:
 			label.deleteLater()
 		self.dispay_label_memory = []
 		self._setup_display_content()
-	
+
+
 	def _setup_edit_content(self) -> None:
 		"""Fill edit frame with editable labels."""
 		for i in range(1, len(self.text_memory[self.display_focus])):
@@ -290,12 +304,14 @@ class EditWindow(QWidget):
 			bottom = self.content_margin[3]
 			label.setContentsMargins(left, top, right, bottom)
 
+
 	def _delete_cur_edit_view(self) -> None:
 		"""Rebuild editable labels."""
 		for label in self.edit_label_memory:
 			label.deleteLater()		
 		self.edit_label_memory = []
 		self._setup_edit_content()
+
 
 	def _on_label_pressed(self, value: tuple):
 		print(value)
@@ -393,6 +409,7 @@ class EditWindow(QWidget):
 				self.text_input.setText(text)
 			self._delete_cur_input_view()
 
+
 	def _on_return(self) -> None:
 		"""Update focused label text form input."""
 		if self.frame_focus == 1 and not self.text_memory[self.display_focus][self.edit_focus+1].startswith("*"):
@@ -411,6 +428,7 @@ class EditWindow(QWidget):
 			self.text_memory[self.display_focus][self.edit_focus+1] = text
 			self._delete_cur_input_view()
 
+
 	def _add_text_label(self) -> None:
 		"""Add new text label below current edit label."""
 		if self.frame_focus == 1:
@@ -421,6 +439,7 @@ class EditWindow(QWidget):
 			self._setup_style_sheet(obj=new_label, focused=True)
 			self.text_input.setReadOnly(False)
 			self.text_input.setText("")
+
 
 	def _show_warning(self, popup_type: str, text_code: int) -> bool | None:
 		"""
@@ -433,6 +452,7 @@ class EditWindow(QWidget):
 		error_window = PopupWindow(popup_type, text_code, self)
 		result = error_window.exec()
 		return result == QMessageBox.Ok
+
 
 	def closeEvent(self, event) -> None:
 		"""Clean up on close."""

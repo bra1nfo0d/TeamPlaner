@@ -113,12 +113,6 @@ class InputWindow(QWidget):
 		self.frame.setFrameShape(QFrame.Box)
 		self.frame.setLineWidth(2)
 		self._setup_style_sheet(obj=self.frame, inner=False)
-#		self.frame.setStyleSheet("""
-#						   padding: 4px;
-#						   border: 2px solid;
-#						   border-radius: 10px;
-#						   border-color: #ccc;
-#		""")
 		self.row1.addWidget(self.frame)
 
 	def _setup_submit_button(self) -> None:
@@ -174,11 +168,7 @@ class InputWindow(QWidget):
 		"""
 		if input_type == [""]:
 			input_type = self.first_input_type
-#			config = self.config_manager.load_config()
-#			input_type = config["first_input_type"]
-
 		self.cur_input_struct = self.input_types[input_type]
-#		self.cur_input_struct = self.config_manager.load_config()["input_types"][input_type]
 		self._clear_content()
 		label_count = len(self.cur_input_struct) - 1
 		self.label_pointer = [0, label_count]
@@ -202,17 +192,7 @@ class InputWindow(QWidget):
 			if i == 0:
 				self._setup_style_sheet(obj=label, focused=True)
 			else:
-				self._setup_style_sheet(obj=label)
-
-#			if i == 0:
-#				color = "yellow"
-#			else:
-#				color = "#ccc"
-#			label.setStyleSheet(f"""
-#					   border: 2px solid;
-#					   border-radius: 10px;
-#					   border-color: {color};
-#					   """)				
+				self._setup_style_sheet(obj=label)			
 			self.frame_layout.addWidget(label)
 			self.label_memory.append(label)
 
@@ -229,7 +209,7 @@ class InputWindow(QWidget):
 		if not re.match(r"\S", entry_text):
 			self._show_warning(popup_type="error", error_code=2)
 			return
-		if re.match(r"text", entry_type):
+		if re.match(r"text", entry_type) or re.match(r"worker", entry_type):
 			if len(self.text_memory[self.label_pointer[0]]) > 1:
 				label.setText(cur_text + "\n" + entry_text)
 			else:
@@ -335,36 +315,15 @@ class InputWindow(QWidget):
 			self._setup_style_sheet(obj=top_label, focused=True)
 			self._setup_style_sheet(obj=cur_label)
 
-#			top_label.setStyleSheet("""
-#						   QLabel {
-#						   border: 2px solid;
-#						   border-color: yellow;
-#						   }""")
-#			cur_label.setStyleSheet("""
-#						   QLabel {
-#						   border: 2px solid;
-#						   border-color: #ccc;
-#						   }""")
 			
 	def _on_label_pressed(self, value: int):
 		if value != self.label_pointer[0]:
 			past_label = self.label_memory[self.label_pointer[0]]
 			self._setup_style_sheet(obj=past_label)
-
-#			past_label.setStyleSheet("""
-#				QLabel {
-#				border: 2px solid;
-#				border-color: #ccc;
-#			}""")
 			self.label_pointer[0] = value
 			cur_label = self.label_memory[value]
 			self._setup_style_sheet(obj=cur_label, focused=True)
 
-#			cur_label.setStyleSheet("""
-#				QLabel {
-#				border: 2px solid;
-#				border-color: yellow;
-#			}""")
 	
 	def _on_arrow_press(self, val: int) -> None:
 		"""Move focus between labels."""
@@ -373,22 +332,12 @@ class InputWindow(QWidget):
 		calc = (pointer+val)%lenght
 		past_label = self.label_memory[self.label_pointer[0]]
 		self._setup_style_sheet(obj=past_label)
-
-#		past_label.setStyleSheet("""
-#			QLabel {
-#			border: 2px solid;
-#			border-color: #ccc;
-#		}""")
 		lenght = self.label_pointer[1]
 		pointer = self.label_pointer[0]
 		self.label_pointer = [calc, lenght]
 		cur_label = self.label_memory[self.label_pointer[0]]
 		self._setup_style_sheet(obj=cur_label, focused=True)
-#		cur_label.setStyleSheet("""
-#						  QLabel {
-#						  border: 2px solid;
-#						  border-color: yellow;
-#						  }""")
+
 	
 	def _clear_content(self) -> None:
 		"""Remove all labels and reset memory."""
