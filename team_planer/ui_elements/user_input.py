@@ -25,6 +25,9 @@ class UserInput:
 			layout (object): Target layout where the frame is added.
 			spacer (object): Spacer item from parent layout.
 		"""
+
+		print(text_memory)
+
 		self.config_manager = ConfigManager()
 
 		self.date = date
@@ -33,7 +36,11 @@ class UserInput:
 		self.layout = layout
 		self.spacer = spacer
 		self.label_memory = []
-		self.calc = 0
+		self.income_sum = 0
+		self.worker_sum = 0
+		self.income_goal_per_worker = 0
+		# type(goal) == str: means there is no calc_input to handle
+		# type(goal) == int: means it handles a calc logic 
 		self.goal = "_"
 		
 		self._load_config()
@@ -58,6 +65,8 @@ class UserInput:
 
 		self.calc_true_color = config["user-input_calc-true-color"]
 		self.calc_false_color = config["user-input_calc-false-color"]
+
+		self.income_goal_per_worker = config["input_goal_per_worker"]
 		
 
 	def _setup_frame(self) -> None:
@@ -73,38 +82,48 @@ class UserInput:
 
 	def _setup_input_content(self) -> None:
 		"""Add labels for text or numeric input data."""
-		for i in range(len(self.text_memory)):
+		for idx_block in range(len(self.text_memory)):
 			label = QLabel()
 			self.label_memory.append(label)
 			self.frame_layout.addWidget(label)
 
-			for j in range(1, len(self.text_memory[i])):
-				if self.text_memory[i][j].startswith("*"):
-					add_text = self.text_memory[i][j][1:]
+			for idx_text in range(1, len(self.text_memory[idx_block])):
+				if self.text_memory[idx_block][idx_text].startswith("*"):
+					add_text = self.text_memory[idx_block][idx_text][1:]
 				else:
-					add_text = self.text_memory[i][j]
+					add_text = self.text_memory[idx_block][idx_text]
 
 				cur_text = label.text()
 
-				if re.match(r"text$", self.text_memory[i][0]):
-					if j == 1:
+				if re.match(r"text$", self.text_memory[idx_block][0]):
+					if idx_text == 1:
 						label.setText(add_text)
 					else:
 						label.setText(cur_text + "\n" + add_text)
 
-				elif re.match(r"calc#", self.text_memory[i][0]):
-					self.goal = int(self.text_memory[i][0].split("#")[1])
-					if j == 1:
+				if re.match(r"worker$", self.text_memory[idx_block][0]):
+					# counts amount of workers by removing the input_type and header
+					self.worker_sum = len(self.text_memory[idx_block]) - 2
+					if idx_text == 1:
 						label.setText(add_text)
 					else:
-						text_num = self.text_memory[i][j].split("#")
+						label.setText(cur_text + "\n" + add_text)
+
+				elif re.match(r"calc#", self.text_memory[idx_block][0]):
+					if self.worker_sum > 0:
+						self.goal = self.income_goal_per_worker * self.worker_sum
+#					self.goal = int(self.text_memory[idx_block][0].split("#")[1])
+					if idx_text == 1:
+						label.setText(add_text)
+					else:
+						text_num = self.text_memory[idx_block][idx_text].split("#")
 						add_text = text_num[0]
 						str_num = text_num[1]
 						if "," in str_num:
 							str_num = str_num.replace(",", ".")
 						num = float(str_num)
 						label.setText(cur_text + "\n" + add_text)
-						self.calc += num
+						self.income_sum += num
 
 				label.setStyleSheet(f"""
 					font-size: {self.font_size}px;
@@ -117,9 +136,9 @@ class UserInput:
 	def _setup_style(self) -> None:
 		"""Apply color styling based on settings and calc results."""
 		if isinstance(self.goal, int):
-			if self.calc >= self.goal:
+			if self.income_sum >= self.goal:
 				outer_color = self.calc_true_color
-			elif self.calc < self.goal:
+			elif self.income_sum < self.goal:
 				outer_color = self.calc_false_color
 		elif isinstance(self.goal, str):
 			outer_color = self.setting[3]

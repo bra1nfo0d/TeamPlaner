@@ -20,6 +20,8 @@ DEFAULT_CONFIG = {
 		"Donnerstag",
 		"Freitag"
 	),
+	"input_goal_per_worker" : 500,
+
 	"display-window_font-size": 10,
 	"display-window_font-family": "Arial",
 	"display-window_font-weight": "Bold",
@@ -77,7 +79,7 @@ DEFAULT_CONFIG = {
 			("Tour", 1, "#ccc", "#ccc"),
 			("_", "text"),
 			("Fahrzeug", "text"),
-			("Monteure", "text"),
+			("Monteure", "worker"),
 			("Aufträge", ("calc#1000"))
 		],
 		"Termin": [
